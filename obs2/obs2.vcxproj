@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{92FCB8F8-AB16-476F-846D-2B6699C620AE}</ProjectGuid>
+    <RootNamespace>obs2</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\build\UI;..\UI;..\build\UI\obs_autogen\include_Debug;$(DepsPath);..\deps\blake2\src;..\build\config;..\deps\jansson\src;..\build\deps\jansson\include;..\UI\obs-frontend-api;..\libobs;..\deps\libff;..\deps\json11;$(QTDIR)\include;$(QTDIR)\include\\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;$(QTDIR)\.\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG=1;_DEBUG=1;DL_OPENGL="libobs-opengl.dll";DL_D3D9="";DL_D3D11="libobs-d3d11.dll";UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;HAVE_OBSCONFIG_H;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4127;4201;4456;4457;4458;4459;4595</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Cored.lib;$(QTDIR)\lib\qtmaind.lib;..\build\ui\obs-frontend-api\Debug\obs-frontend-api.lib;$(DEPSPATH)\..\bin\avcodec.lib;$(DEPSPATH)\..\bin\avutil.lib;$(DEPSPATH)\..\bin\avformat.lib;$(DEPSPATH)\..\bin\libcurl.lib;crypt32.lib;..\build\deps\blake2\Debug\blake2.lib;..\build\deps\jansson\lib\Debug\jansson_d.lib;..\build\libobs\Debug\obs.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\build\UI\obs_autogen\mocs_compilation.cpp" />
+    <ClCompile Include="..\build\UI\qrc_obs.cpp" />
+    <ClCompile Include="..\deps\json11\json11.cpp" />
+    <ClCompile Include="..\deps\libff\libff\ff-util.c" />
+    <ClCompile Include="..\UI\adv-audio-control.cpp" />
+    <ClCompile Include="..\UI\api-interface.cpp" />
+    <ClCompile Include="..\UI\audio-encoders.cpp" />
+    <ClCompile Include="..\UI\crash-report.cpp" />
+    <ClCompile Include="..\UI\double-slider.cpp" />
+    <ClCompile Include="..\UI\focus-list.cpp" />
+    <ClCompile Include="..\UI\horizontal-scroll-area.cpp" />
+    <ClCompile Include="..\UI\hotkey-edit.cpp" />
+    <ClCompile Include="..\UI\item-widget-helpers.cpp" />
+    <ClCompile Include="..\UI\locked-checkbox.cpp" />
+    <ClCompile Include="..\UI\menu-button.cpp" />
+    <ClCompile Include="..\UI\obs-app.cpp" />
+    <ClCompile Include="..\UI\platform-windows.cpp" />
+    <ClCompile Include="..\UI\properties-view.cpp" />
+    <ClCompile Include="..\UI\qt-display.cpp" />
+    <ClCompile Include="..\UI\qt-wrappers.cpp" />
+    <ClCompile Include="..\UI\remote-text.cpp" />
+    <ClCompile Include="..\UI\slider-absoluteset-style.cpp" />
+    <ClCompile Include="..\UI\source-label.cpp" />
+    <ClCompile Include="..\UI\source-list-widget.cpp" />
+    <ClCompile Include="..\UI\source-tree.cpp" />
+    <ClCompile Include="..\UI\vertical-scroll-area.cpp" />
+    <ClCompile Include="..\UI\visibility-checkbox.cpp" />
+    <ClCompile Include="..\UI\visibility-item-widget.cpp" />
+    <ClCompile Include="..\UI\volume-control.cpp" />
+    <ClCompile Include="..\UI\win-update\update-window.cpp" />
+    <ClCompile Include="..\UI\win-update\win-update-helpers.cpp" />
+    <ClCompile Include="..\UI\win-update\win-update.cpp" />
+    <ClCompile Include="..\UI\window-basic-about.cpp" />
+    <ClCompile Include="..\UI\window-basic-adv-audio.cpp" />
+    <ClCompile Include="..\UI\window-basic-auto-config-test.cpp" />
+    <ClCompile Include="..\UI\window-basic-auto-config.cpp" />
+    <ClCompile Include="..\UI\window-basic-filters.cpp" />
+    <ClCompile Include="..\UI\window-basic-interaction.cpp" />
+    <ClCompile Include="..\UI\window-basic-main-dropfiles.cpp" />
+    <ClCompile Include="..\UI\window-basic-main-outputs.cpp" />
+    <ClCompile Include="..\UI\window-basic-main-profiles.cpp" />
+    <ClCompile Include="..\UI\window-basic-main-scene-collections.cpp" />
+    <ClCompile Include="..\UI\window-basic-main-transitions.cpp" />
+    <ClCompile Include="..\UI\window-basic-main.cpp" />
+    <ClCompile Include="..\UI\window-basic-preview.cpp" />
+    <ClCompile Include="..\UI\window-basic-properties.cpp" />
+    <ClCompile Include="..\UI\window-basic-settings.cpp" />
+    <ClCompile Include="..\UI\window-basic-source-select.cpp" />
+    <ClCompile Include="..\UI\window-basic-stats.cpp" />
+    <ClCompile Include="..\UI\window-basic-status-bar.cpp" />
+    <ClCompile Include="..\UI\window-basic-transform.cpp" />
+    <ClCompile Include="..\UI\window-log-reply.cpp" />
+    <ClCompile Include="..\UI\window-namedialog.cpp" />
+    <ClCompile Include="..\UI\window-projector.cpp" />
+    <ClCompile Include="..\UI\window-remux.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\UI\forms\AutoConfigStartPage.ui" />
+    <None Include="..\UI\forms\AutoConfigStreamPage.ui" />
+    <None Include="..\UI\forms\AutoConfigTestPage.ui" />
+    <None Include="..\UI\forms\AutoConfigVideoPage.ui" />
+    <None Include="..\UI\forms\ColorSelect.ui" />
+    <None Include="..\UI\forms\NameDialog.ui" />
+    <None Include="..\UI\forms\obs.qrc" />
+    <None Include="..\UI\forms\OBSAbout.ui" />
+    <None Include="..\UI\forms\OBSBasic.ui" />
+    <None Include="..\UI\forms\OBSBasicFilters.ui" />
+    <None Include="..\UI\forms\OBSBasicInteraction.ui" />
+    <None Include="..\UI\forms\OBSBasicSettings.ui" />
+    <None Include="..\UI\forms\OBSBasicSourceSelect.ui" />
+    <None Include="..\UI\forms\OBSBasicTransform.ui" />
+    <None Include="..\UI\forms\OBSLogReply.ui" />
+    <None Include="..\UI\forms\OBSRemux.ui" />
+    <None Include="..\UI\forms\OBSUpdate.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\build\UI\ui_AutoConfigStartPage.h" />
+    <ClInclude Include="..\build\UI\ui_AutoConfigStreamPage.h" />
+    <ClInclude Include="..\build\UI\ui_AutoConfigTestPage.h" />
+    <ClInclude Include="..\build\UI\ui_AutoConfigVideoPage.h" />
+    <ClInclude Include="..\build\UI\ui_ColorSelect.h" />
+    <ClInclude Include="..\build\UI\ui_NameDialog.h" />
+    <ClInclude Include="..\build\UI\ui_OBSAbout.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasic.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasicFilters.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasicInteraction.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasicSettings.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasicSourceSelect.h" />
+    <ClInclude Include="..\build\UI\ui_OBSBasicTransform.h" />
+    <ClInclude Include="..\build\UI\ui_OBSLogReply.h" />
+    <ClInclude Include="..\build\UI\ui_OBSRemux.h" />
+    <ClInclude Include="..\build\UI\ui_OBSUpdate.h" />
+    <ClInclude Include="..\deps\json11\json11.hpp" />
+    <ClInclude Include="..\deps\libff\libff\ff-util.h" />
+    <ClInclude Include="..\UI\adv-audio-control.hpp" />
+    <ClInclude Include="..\UI\audio-encoders.hpp" />
+    <ClInclude Include="..\UI\balance-slider.hpp" />
+    <ClInclude Include="..\UI\clickable-label.hpp" />
+    <ClInclude Include="..\UI\crash-report.hpp" />
+    <ClInclude Include="..\UI\display-helpers.hpp" />
+    <ClInclude Include="..\UI\double-slider.hpp" />
+    <ClInclude Include="..\UI\expand-checkbox.hpp" />
+    <ClInclude Include="..\UI\focus-list.hpp" />
+    <ClInclude Include="..\UI\horizontal-scroll-area.hpp" />
+    <ClInclude Include="..\UI\hotkey-edit.hpp" />
+    <ClInclude Include="..\UI\item-widget-helpers.hpp" />
+    <ClInclude Include="..\UI\locked-checkbox.hpp" />
+    <ClInclude Include="..\UI\menu-button.hpp" />
+    <ClInclude Include="..\UI\mute-checkbox.hpp" />
+    <ClInclude Include="..\UI\obs-app.hpp" />
+    <ClInclude Include="..\UI\platform.hpp" />
+    <ClInclude Include="..\UI\properties-view.hpp" />
+    <ClInclude Include="..\UI\properties-view.moc.hpp" />
+    <ClInclude Include="..\UI\qt-display.hpp" />
+    <ClInclude Include="..\UI\qt-wrappers.hpp" />
+    <ClInclude Include="..\UI\remote-text.hpp" />
+    <ClInclude Include="..\UI\slider-absoluteset-style.hpp" />
+    <ClInclude Include="..\UI\source-label.hpp" />
+    <ClInclude Include="..\UI\source-list-widget.hpp" />
+    <ClInclude Include="..\UI\source-tree.hpp" />
+    <ClInclude Include="..\UI\vertical-scroll-area.hpp" />
+    <ClInclude Include="..\UI\visibility-checkbox.hpp" />
+    <ClInclude Include="..\UI\visibility-item-widget.hpp" />
+    <ClInclude Include="..\UI\volume-control.hpp" />
+    <ClInclude Include="..\UI\win-update\update-window.hpp" />
+    <ClInclude Include="..\UI\win-update\win-update-helpers.hpp" />
+    <ClInclude Include="..\UI\win-update\win-update.hpp" />
+    <ClInclude Include="..\UI\window-basic-about.hpp" />
+    <ClInclude Include="..\UI\window-basic-adv-audio.hpp" />
+    <ClInclude Include="..\UI\window-basic-auto-config.hpp" />
+    <ClInclude Include="..\UI\window-basic-filters.hpp" />
+    <ClInclude Include="..\UI\window-basic-interaction.hpp" />
+    <ClInclude Include="..\UI\window-basic-main-outputs.hpp" />
+    <ClInclude Include="..\UI\window-basic-main.hpp" />
+    <ClInclude Include="..\UI\window-basic-preview.hpp" />
+    <ClInclude Include="..\UI\window-basic-properties.hpp" />
+    <ClInclude Include="..\UI\window-basic-settings.hpp" />
+    <ClInclude Include="..\UI\window-basic-source-select.hpp" />
+    <ClInclude Include="..\UI\window-basic-stats.hpp" />
+    <ClInclude Include="..\UI\window-basic-status-bar.hpp" />
+    <ClInclude Include="..\UI\window-basic-transform.hpp" />
+    <ClInclude Include="..\UI\window-log-reply.hpp" />
+    <ClInclude Include="..\UI\window-main.hpp" />
+    <ClInclude Include="..\UI\window-namedialog.hpp" />
+    <ClInclude Include="..\UI\window-projector.hpp" />
+    <ClInclude Include="..\UI\window-remux.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\build\deps\blake2\blake2.vcxproj">
+      <Project>{8ebd9dfb-76d0-3cdb-9bd6-9cf21ef2f9b6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\deps\jansson\jansson.vcxproj">
+      <Project>{98030179-1ffe-3624-b55a-3f3acbe96ce3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\libobs\libobs.vcxproj">
+      <Project>{0a6e28a5-4520-3c2b-b117-6d56a35bb6c2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build\UI\obs-frontend-api\obs-frontend-api.vcxproj">
+      <Project>{488bb498-7f90-37f7-ba9f-26f599e66c7b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
