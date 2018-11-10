@@ -54,6 +54,8 @@
 
 #include <iostream>
 
+#include "../obs2/forms/broadcastwindow.hpp"
+
 using namespace std;
 
 static log_handler_t def_log_handler;
@@ -1242,6 +1244,9 @@ bool OBSApp::OBSInit()
 	setQuitOnLastWindowClosed(false);
 
 	mainWindow = new OBSBasic();
+
+	broadcastWindow = new BroadcastWindow(0);
+	broadcastWindow->show();
 
 	mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));

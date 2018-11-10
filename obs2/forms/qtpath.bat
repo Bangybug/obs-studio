@@ -1,0 +1,1 @@
+set path=%path%;F:\Qt\Qt5.9.0\5.9\msvc2017_64\bin

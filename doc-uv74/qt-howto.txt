@@ -1,0 +1,4 @@
+—делать с/c++ из ui
+
+	uic -o PizzaEntry.h pizza.ui
+	uic -i PizzaEntry.h -o PizzaEntry.cpp pizza.ui

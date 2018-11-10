@@ -40,6 +40,8 @@ std::string GenerateSpecifiedFilename(const char *extension, bool noSpace,
 					const char *format);
 QObject *CreateShortcutFilter();
 
+#include "../obs2/forms/broadcastwindow.hpp"
+
 struct BaseLexer {
 	lexer lex;
 public:
@@ -168,6 +170,10 @@ public:
 
 signals:
 	void StyleChanged();
+
+private:
+
+	QPointer<BroadcastWindow> broadcastWindow;
 };
 
 int GetConfigPath(char *path, size_t size, const char *name);

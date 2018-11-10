@@ -180,6 +180,9 @@
     <ClCompile Include="..\UI\window-namedialog.cpp" />
     <ClCompile Include="..\UI\window-projector.cpp" />
     <ClCompile Include="..\UI\window-remux.cpp" />
+    <ClCompile Include="forms\broadcastwindow.cpp" />
+    <ClCompile Include="forms\chatpane.cpp" />
+    <ClCompile Include="forms\previewpane.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\UI\forms\AutoConfigStartPage.ui" />
@@ -271,6 +274,15 @@
     <ClInclude Include="..\UI\window-namedialog.hpp" />
     <ClInclude Include="..\UI\window-projector.hpp" />
     <ClInclude Include="..\UI\window-remux.hpp" />
+    <ClInclude Include="forms\broadcastwindow.hpp" />
+    <ClInclude Include="forms\broadcastwindow.moc.hpp" />
+    <ClInclude Include="forms\chatpane.hpp" />
+    <ClInclude Include="forms\chatpane.moc.hpp" />
+    <ClInclude Include="forms\previewpane.hpp" />
+    <ClInclude Include="forms\previewpane.moc.hpp" />
+    <ClInclude Include="forms\ui-broadcastwindow.hpp" />
+    <ClInclude Include="forms\ui-chatpane.hpp" />
+    <ClInclude Include="forms\ui-previewpane.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\build\deps\blake2\blake2.vcxproj">

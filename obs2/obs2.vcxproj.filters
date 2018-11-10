@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="uv74-generated">
+      <UniqueIdentifier>{42a804ed-e13e-44b1-95b6-e488474d6642}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="uv74">
+      <UniqueIdentifier>{4f7d13b4-cf20-4121-b115-5be56f4ccc5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\UI\adv-audio-control.cpp">
@@ -179,6 +185,15 @@
     </ClCompile>
     <ClCompile Include="..\UI\win-update\win-update-helpers.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="forms\broadcastwindow.cpp">
+      <Filter>uv74</Filter>
+    </ClCompile>
+    <ClCompile Include="forms\chatpane.cpp">
+      <Filter>uv74</Filter>
+    </ClCompile>
+    <ClCompile Include="forms\previewpane.cpp">
+      <Filter>uv74</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -410,6 +425,33 @@
     </ClInclude>
     <ClInclude Include="..\UI\win-update\win-update-helpers.hpp">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\ui-broadcastwindow.hpp">
+      <Filter>uv74-generated</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\ui-chatpane.hpp">
+      <Filter>uv74-generated</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\ui-previewpane.hpp">
+      <Filter>uv74-generated</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\broadcastwindow.hpp">
+      <Filter>uv74</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\chatpane.hpp">
+      <Filter>uv74</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\previewpane.hpp">
+      <Filter>uv74</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\broadcastwindow.moc.hpp">
+      <Filter>uv74-generated</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\chatpane.moc.hpp">
+      <Filter>uv74-generated</Filter>
+    </ClInclude>
+    <ClInclude Include="forms\previewpane.moc.hpp">
+      <Filter>uv74-generated</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
