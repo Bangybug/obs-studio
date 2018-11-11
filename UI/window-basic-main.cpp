@@ -140,7 +140,7 @@ static void AddExtraModulePaths()
 #endif
 }
 
-extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
+extern obs_frontend_callbacks *InitializeAPIInterface(IMainWindow *main);
 
 static int CountVideoSources()
 {
@@ -6807,3 +6807,123 @@ ColorSelect::ColorSelect(QWidget *parent)
 {
 	ui->setupUi(this);
 }
+
+
+
+int OBSBasic::getSceneCount()
+{
+	return  ui->scenes->count();
+}
+
+OBSScene OBSBasic::getScene(int index)
+{
+	QListWidgetItem *item = ui->scenes->item(index);
+	return GetOBSRef<OBSScene>(item);
+}
+
+QMainWindow* OBSBasic::getWindow()
+{
+	return this;
+}
+
+OBSWeakSource OBSBasic::getProgramScene()
+{
+	return programScene;
+}
+
+int OBSBasic::getTransitionCount()
+{
+	return ui->transitions->count();
+}
+
+OBSSource OBSBasic::getTransition(int index)
+{
+	return ui->transitions->itemData(index).value<OBSSource>();
+}
+
+void OBSBasic::openSceneCollection(const char* collection)
+{
+	QList<QAction*> menuActions =
+		ui->sceneCollectionMenu->actions();
+	QString qstrCollection = QT_UTF8(collection);
+
+	for (int i = 0; i < menuActions.count(); i++) {
+		QAction *action = menuActions[i];
+		QVariant v = action->property("file_name");
+
+		if (v.typeName() != nullptr) {
+			if (action->text() == qstrCollection) {
+				action->trigger();
+				break;
+			}
+		}
+	}
+}
+
+void OBSBasic::setCurrentProfile(const char* profile)
+{
+	QList<QAction*> menuActions =
+		ui->profileMenu->actions();
+	QString qstrProfile = QT_UTF8(profile);
+
+	for (int i = 0; i < menuActions.count(); i++) {
+		QAction *action = menuActions[i];
+		QVariant v = action->property("file_name");
+
+		if (v.typeName() != nullptr) {
+			if (action->text() == qstrProfile) {
+				action->trigger();
+				break;
+			}
+		}
+	}
+}
+
+bool OBSBasic::isStreamingActive()
+{
+	return outputHandler->StreamingActive();
+}
+
+bool OBSBasic::isRecordingActive()
+{
+	return outputHandler->RecordingActive();
+}
+
+bool OBSBasic::isReplayBufferActive()
+{
+	return outputHandler->ReplayBufferActive();
+}
+
+void* OBSBasic::addToolsMenuAction(const char *name)
+{
+	ui->menuTools->setEnabled(true);
+	return (void*)ui->menuTools->addAction(QT_UTF8(name));
+}
+
+void OBSBasic::addToolsMenuItem(const char *name, obs_frontend_cb callback, void *private_data)
+{
+	ui->menuTools->setEnabled(true);
+	auto func = [private_data, callback]()
+	{
+		callback(private_data);
+	};
+
+	QAction *action =ui->menuTools->addAction(QT_UTF8(name));
+	QObject::connect(action, &QAction::triggered, func);
+}
+
+std::unique_ptr<BasicOutputHandler>& OBSBasic::getOutputHandler()
+{
+	return outputHandler;
+}
+
+config_t *OBSBasic::getProfileConfig()
+{
+	return basicConfig;
+}
+
+bool OBSBasic::isPreviewEnabled()
+{
+	return previewEnabled;
+}
+

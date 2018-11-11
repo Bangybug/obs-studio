@@ -6,6 +6,8 @@
 
 #include <functional>
 
+#include "../obs2/hack/imainwindow.h"
+
 using namespace std;
 
 Q_DECLARE_METATYPE(OBSScene);
@@ -46,31 +48,30 @@ template <typename T> inline size_t GetCallbackIdx(
 }
 
 struct OBSStudioAPI : obs_frontend_callbacks {
-	OBSBasic *main;
+	IMainWindow *main;
 	vector<OBSStudioCallback<obs_frontend_event_cb>> callbacks;
 	vector<OBSStudioCallback<obs_frontend_save_cb>> saveCallbacks;
 	vector<OBSStudioCallback<obs_frontend_save_cb>> preloadCallbacks;
 
-	inline OBSStudioAPI(OBSBasic *main_) : main(main_) {}
+	inline OBSStudioAPI(IMainWindow *main_) : main(main_) {}
 
 	void *obs_frontend_get_main_window(void) override
 	{
-		return (void*)main;
+		return (void*)main->getWindow();
 	}
 
 	void *obs_frontend_get_main_window_handle(void) override
 	{
-		return (void*)main->winId();
+		return (void*)main->getWindow()->winId();
 	}
 
 	void obs_frontend_get_scenes(
 			struct obs_frontend_source_list *sources) override
 	{
-		for (int i = 0; i < main->ui->scenes->count(); i++) {
-			QListWidgetItem *item = main->ui->scenes->item(i);
-			OBSScene scene = GetOBSRef<OBSScene>(item);
+		int sceneCount = main->getSceneCount();
+		for (int i = 0; i < sceneCount; i++) {
+			OBSScene scene = main->getScene(i);
 			obs_source_t *source = obs_scene_get_source(scene);
-
 			obs_source_addref(source);
 			da_push_back(sources->sources, &source);
 		}
@@ -81,7 +82,7 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 		OBSSource source;
 
 		if (main->IsPreviewProgramMode()) {
-			source = obs_weak_source_get_source(main->programScene);
+			source = obs_weak_source_get_source(main->getProgramScene());
 		} else {
 			source = main->GetCurrentSceneSource();
 			obs_source_addref(source);
@@ -92,11 +93,11 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_set_current_scene(obs_source_t *scene) override
 	{
 		if (main->IsPreviewProgramMode()) {
-			QMetaObject::invokeMethod(main, "TransitionToScene",
+			QMetaObject::invokeMethod(main->getWindow(), "TransitionToScene",
 					WaitConnection(),
 					Q_ARG(OBSSource, OBSSource(scene)));
 		} else {
-			QMetaObject::invokeMethod(main, "SetCurrentScene",
+			QMetaObject::invokeMethod(main->getWindow(), "SetCurrentScene",
 					WaitConnection(),
 					Q_ARG(OBSSource, OBSSource(scene)),
 					Q_ARG(bool, false));
@@ -106,9 +107,9 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_get_transitions(
 			struct obs_frontend_source_list *sources) override
 	{
-		for (int i = 0; i < main->ui->transitions->count(); i++) {
-			OBSSource tr = main->ui->transitions->itemData(i)
-				.value<OBSSource>();
+		int transitionCount = main->getTransitionCount();
+		for (int i = 0; i < transitionCount; i++) {
+			OBSSource tr = main->getTransition(i);
 
 			obs_source_addref(tr);
 			da_push_back(sources->sources, &tr);
@@ -126,7 +127,7 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_set_current_transition(
 			obs_source_t *transition) override
 	{
-		QMetaObject::invokeMethod(main, "SetTransition",
+		QMetaObject::invokeMethod(main->getWindow(), "SetTransition",
 				Q_ARG(OBSSource, OBSSource(transition)));
 	}
 
@@ -152,28 +153,14 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_set_current_scene_collection(
 			const char *collection) override
 	{
-		QList<QAction*> menuActions =
-			main->ui->sceneCollectionMenu->actions();
-		QString qstrCollection = QT_UTF8(collection);
-
-		for (int i = 0; i < menuActions.count(); i++) {
-			QAction *action = menuActions[i];
-			QVariant v = action->property("file_name");
-
-			if (v.typeName() != nullptr) {
-				if (action->text() == qstrCollection) {
-					action->trigger();
-					break;
-				}
-			}
-		}
+		main->openSceneCollection(collection);
 	}
 
 	bool obs_frontend_add_scene_collection(
 			const char *name) override
 	{
 		bool success = false;
-		QMetaObject::invokeMethod(main,
+		QMetaObject::invokeMethod(main->getWindow(),
 				"AddSceneCollection",
 				WaitConnection(),
 				Q_RETURN_ARG(bool, success),
@@ -203,91 +190,68 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 
 	void obs_frontend_set_current_profile(const char *profile) override
 	{
-		QList<QAction*> menuActions =
-			main->ui->profileMenu->actions();
-		QString qstrProfile = QT_UTF8(profile);
-
-		for (int i = 0; i < menuActions.count(); i++) {
-			QAction *action = menuActions[i];
-			QVariant v = action->property("file_name");
-
-			if (v.typeName() != nullptr) {
-				if (action->text() == qstrProfile) {
-					action->trigger();
-					break;
-				}
-			}
-		}
+		main->setCurrentProfile(profile);
 	}
 
 	void obs_frontend_streaming_start(void) override
 	{
-		QMetaObject::invokeMethod(main, "StartStreaming");
+		QMetaObject::invokeMethod(main->getWindow(), "StartStreaming");
 	}
 
 	void obs_frontend_streaming_stop(void) override
 	{
-		QMetaObject::invokeMethod(main, "StopStreaming");
+		QMetaObject::invokeMethod(main->getWindow(), "StopStreaming");
 	}
 
 	bool obs_frontend_streaming_active(void) override
 	{
-		return main->outputHandler->StreamingActive();
+		return main->isStreamingActive();
 	}
 
 	void obs_frontend_recording_start(void) override
 	{
-		QMetaObject::invokeMethod(main, "StartRecording");
+		QMetaObject::invokeMethod(main->getWindow(), "StartRecording");
 	}
 
 	void obs_frontend_recording_stop(void) override
 	{
-		QMetaObject::invokeMethod(main, "StopRecording");
+		QMetaObject::invokeMethod(main->getWindow(), "StopRecording");
 	}
 
 	bool obs_frontend_recording_active(void) override
 	{
-		return main->outputHandler->RecordingActive();
+		return main->isRecordingActive();
 	}
 
 	void obs_frontend_replay_buffer_start(void) override
 	{
-		QMetaObject::invokeMethod(main, "StartReplayBuffer");
+		QMetaObject::invokeMethod(main->getWindow(), "StartReplayBuffer");
 	}
 
 	void obs_frontend_replay_buffer_save(void) override
 	{
-		QMetaObject::invokeMethod(main, "ReplayBufferSave");
+		QMetaObject::invokeMethod(main->getWindow(), "ReplayBufferSave");
 	}
 
 	void obs_frontend_replay_buffer_stop(void) override
 	{
-		QMetaObject::invokeMethod(main, "StopReplayBuffer");
+		QMetaObject::invokeMethod(main->getWindow(), "StopReplayBuffer");
 	}
 
 	bool obs_frontend_replay_buffer_active(void) override
 	{
-		return main->outputHandler->ReplayBufferActive();
+		return main->isReplayBufferActive();
 	}
 
 	void *obs_frontend_add_tools_menu_qaction(const char *name) override
 	{
-		main->ui->menuTools->setEnabled(true);
-		return (void*)main->ui->menuTools->addAction(QT_UTF8(name));
+		return main->addToolsMenuAction(name);
 	}
 
 	void obs_frontend_add_tools_menu_item(const char *name,
 			obs_frontend_cb callback, void *private_data) override
 	{
-		main->ui->menuTools->setEnabled(true);
-
-		auto func = [private_data, callback] ()
-		{
-			callback(private_data);
-		};
-
-		QAction *action = main->ui->menuTools->addAction(QT_UTF8(name));
-		QObject::connect(action, &QAction::triggered, func);
+		main->addToolsMenuItem(name,callback, private_data);
 	}
 
 	void obs_frontend_add_event_callback(obs_frontend_event_cb callback,
@@ -310,28 +274,28 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 
 	obs_output_t *obs_frontend_get_streaming_output(void) override
 	{
-		OBSOutput output = main->outputHandler->streamOutput;
+		OBSOutput output = main->getOutputHandler()->streamOutput;
 		obs_output_addref(output);
 		return output;
 	}
 
 	obs_output_t *obs_frontend_get_recording_output(void) override
 	{
-		OBSOutput out = main->outputHandler->fileOutput;
+		OBSOutput out = main->getOutputHandler()->fileOutput;
 		obs_output_addref(out);
 		return out;
 	}
 
 	obs_output_t *obs_frontend_get_replay_buffer_output(void) override
 	{
-		OBSOutput out = main->outputHandler->replayBuffer;
+		OBSOutput out = main->getOutputHandler()->replayBuffer;
 		obs_output_addref(out);
 		return out;
 	}
 
 	config_t *obs_frontend_get_profile_config(void) override
 	{
-		return main->basicConfig;
+		return main->getProfileConfig();
 	}
 
 	config_t *obs_frontend_get_global_config(void) override
@@ -346,12 +310,12 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 
 	void obs_frontend_defer_save_begin(void) override
 	{
-		QMetaObject::invokeMethod(main, "DeferSaveBegin");
+		QMetaObject::invokeMethod(main->getWindow(), "DeferSaveBegin");
 	}
 
 	void obs_frontend_defer_save_end(void) override
 	{
-		QMetaObject::invokeMethod(main, "DeferSaveEnd");
+		QMetaObject::invokeMethod(main->getWindow(), "DeferSaveEnd");
 	}
 
 	void obs_frontend_add_save_callback(obs_frontend_save_cb callback,
@@ -432,12 +396,12 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 
 	bool obs_frontend_preview_enabled(void) override
 	{
-		return main->previewEnabled;
+		return main->isPreviewEnabled();
 	}
 
 	void obs_frontend_set_preview_enabled(bool enable) override
 	{
-		if (main->previewEnabled != enable)
+		if (main->isPreviewEnabled() != enable)
 			main->EnablePreviewDisplay(enable);
 	}
 
@@ -456,7 +420,7 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	void obs_frontend_set_current_preview_scene(obs_source_t *scene) override
 	{
 		if (main->IsPreviewProgramMode()) {
-			QMetaObject::invokeMethod(main, "SetCurrentScene",
+			QMetaObject::invokeMethod(main->getWindow(), "SetCurrentScene",
 				Q_ARG(OBSSource, OBSSource(scene)),
 				Q_ARG(bool, false));
 		}
@@ -488,7 +452,7 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 
 	void on_event(enum obs_frontend_event event) override
 	{
-		if (main->disableSaving)
+		if (main->SavingDisabled())
 			return;
 
 		for (size_t i = callbacks.size(); i > 0; i--) {
@@ -498,7 +462,7 @@ struct OBSStudioAPI : obs_frontend_callbacks {
 	}
 };
 
-obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main)
+obs_frontend_callbacks *InitializeAPIInterface(IMainWindow *main)
 {
 	obs_frontend_callbacks *api = new OBSStudioAPI(main);
 	obs_frontend_set_callbacks_internal(api);

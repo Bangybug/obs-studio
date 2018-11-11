@@ -48,28 +48,35 @@ public:
     {
         if (BroadcastWindow->objectName().isEmpty())
             BroadcastWindow->setObjectName(QStringLiteral("BroadcastWindow"));
-        BroadcastWindow->resize(800, 589);
-        BroadcastWindow->setMaximumSize(QSize(800, 16777215));
+        BroadcastWindow->resize(962, 696);
+        BroadcastWindow->setMaximumSize(QSize(16777215, 16777215));
         centralwidget = new QWidget(BroadcastWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
-        verticalLayout_2 = new QVBoxLayout(centralwidget);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        widget = new QWidget(centralwidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(widget->sizePolicy().hasHeightForWidth());
-        widget->setSizePolicy(sizePolicy);
-        verticalLayout = new QVBoxLayout(widget);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        label = new QLabel(widget);
-        label->setObjectName(QStringLiteral("label"));
-        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy.setHeightForWidth(centralwidget->sizePolicy().hasHeightForWidth());
+        centralwidget->setSizePolicy(sizePolicy);
+        verticalLayout_2 = new QVBoxLayout(centralwidget);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        verticalLayout_2->setSizeConstraint(QLayout::SetMaximumSize);
+        widget = new QWidget(centralwidget);
+        widget->setObjectName(QStringLiteral("widget"));
+        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy1);
+        sizePolicy1.setHeightForWidth(widget->sizePolicy().hasHeightForWidth());
+        widget->setSizePolicy(sizePolicy1);
+        verticalLayout = new QVBoxLayout(widget);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setSizeConstraint(QLayout::SetMaximumSize);
+        label = new QLabel(widget);
+        label->setObjectName(QStringLiteral("label"));
+        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
+        label->setSizePolicy(sizePolicy2);
 
         verticalLayout->addWidget(label);
 
@@ -78,21 +85,27 @@ public:
         horizontalLayout_2->setSizeConstraint(QLayout::SetMaximumSize);
         chatPane = new ChatPane(widget);
         chatPane->setObjectName(QStringLiteral("chatPane"));
+        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(chatPane->sizePolicy().hasHeightForWidth());
+        chatPane->setSizePolicy(sizePolicy3);
         chatPane->setMinimumSize(QSize(400, 0));
 
         horizontalLayout_2->addWidget(chatPane);
 
         previewPane = new PreviewPane(widget);
         previewPane->setObjectName(QStringLiteral("previewPane"));
-        QSizePolicy sizePolicy2(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        sizePolicy2.setHorizontalStretch(1);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(previewPane->sizePolicy().hasHeightForWidth());
-        previewPane->setSizePolicy(sizePolicy2);
+        QSizePolicy sizePolicy4(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        sizePolicy4.setHorizontalStretch(2);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(previewPane->sizePolicy().hasHeightForWidth());
+        previewPane->setSizePolicy(sizePolicy4);
         previewPane->setMinimumSize(QSize(200, 0));
-        previewPane->setMaximumSize(QSize(0, 16777215));
+        previewPane->setMaximumSize(QSize(16777215, 16777215));
+        previewPane->setAutoFillBackground(false);
 
-        horizontalLayout_2->addWidget(previewPane, 0, Qt::AlignLeft);
+        horizontalLayout_2->addWidget(previewPane);
 
 
         verticalLayout->addLayout(horizontalLayout_2);
@@ -103,19 +116,22 @@ public:
         horizontalWidget = new QWidget(centralwidget);
         horizontalWidget->setObjectName(QStringLiteral("horizontalWidget"));
         horizontalWidget->setEnabled(true);
-        sizePolicy1.setHeightForWidth(horizontalWidget->sizePolicy().hasHeightForWidth());
-        horizontalWidget->setSizePolicy(sizePolicy1);
+        QSizePolicy sizePolicy5(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        sizePolicy5.setHorizontalStretch(0);
+        sizePolicy5.setVerticalStretch(0);
+        sizePolicy5.setHeightForWidth(horizontalWidget->sizePolicy().hasHeightForWidth());
+        horizontalWidget->setSizePolicy(sizePolicy5);
         horizontalWidget->setMinimumSize(QSize(0, 50));
         horizontalLayout = new QHBoxLayout(horizontalWidget);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setSizeConstraint(QLayout::SetMinimumSize);
         btnPlay = new QPushButton(horizontalWidget);
         btnPlay->setObjectName(QStringLiteral("btnPlay"));
-        QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        sizePolicy3.setHorizontalStretch(0);
-        sizePolicy3.setVerticalStretch(0);
-        sizePolicy3.setHeightForWidth(btnPlay->sizePolicy().hasHeightForWidth());
-        btnPlay->setSizePolicy(sizePolicy3);
+        QSizePolicy sizePolicy6(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy6.setHorizontalStretch(0);
+        sizePolicy6.setVerticalStretch(0);
+        sizePolicy6.setHeightForWidth(btnPlay->sizePolicy().hasHeightForWidth());
+        btnPlay->setSizePolicy(sizePolicy6);
         btnPlay->setMinimumSize(QSize(32, 32));
         QIcon icon;
         icon.addFile(QStringLiteral(":/res/images/uvplay.png"), QSize(), QIcon::Selected, QIcon::Off);
@@ -131,19 +147,16 @@ public:
         labelDuration = new QLabel(horizontalWidget);
         labelDuration->setObjectName(QStringLiteral("labelDuration"));
         labelDuration->setEnabled(false);
-        QSizePolicy sizePolicy4(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        sizePolicy4.setHorizontalStretch(0);
-        sizePolicy4.setVerticalStretch(0);
-        sizePolicy4.setHeightForWidth(labelDuration->sizePolicy().hasHeightForWidth());
-        labelDuration->setSizePolicy(sizePolicy4);
+        sizePolicy.setHeightForWidth(labelDuration->sizePolicy().hasHeightForWidth());
+        labelDuration->setSizePolicy(sizePolicy);
         labelDuration->setMinimumSize(QSize(47, 0));
 
         horizontalLayout->addWidget(labelDuration);
 
         pushButton = new QPushButton(horizontalWidget);
         pushButton->setObjectName(QStringLiteral("pushButton"));
-        sizePolicy3.setHeightForWidth(pushButton->sizePolicy().hasHeightForWidth());
-        pushButton->setSizePolicy(sizePolicy3);
+        sizePolicy6.setHeightForWidth(pushButton->sizePolicy().hasHeightForWidth());
+        pushButton->setSizePolicy(sizePolicy6);
         pushButton->setMinimumSize(QSize(180, 0));
 
         horizontalLayout->addWidget(pushButton);
@@ -154,7 +167,7 @@ public:
         BroadcastWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(BroadcastWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 21));
+        menubar->setGeometry(QRect(0, 0, 962, 21));
         BroadcastWindow->setMenuBar(menubar);
 
         retranslateUi(BroadcastWindow);

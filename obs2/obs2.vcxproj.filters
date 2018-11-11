@@ -453,5 +453,8 @@
     <ClInclude Include="forms\previewpane.moc.hpp">
       <Filter>uv74-generated</Filter>
     </ClInclude>
+    <ClInclude Include="hack\imainwindow.h">
+      <Filter>uv74</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

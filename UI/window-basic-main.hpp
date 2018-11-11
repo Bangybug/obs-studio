@@ -48,6 +48,8 @@ class OBSBasicStats;
 #include "ui_OBSBasic.h"
 #include "ui_ColorSelect.h"
 
+#include "../obs2/hack/imainwindow.h"
+
 #define DESKTOP_AUDIO_1 Str("DesktopAudioDevice1")
 #define DESKTOP_AUDIO_2 Str("DesktopAudioDevice2")
 #define AUX_AUDIO_1     Str("AuxAudioDevice1")
@@ -99,7 +101,7 @@ private:
 	std::shared_ptr<OBSSignal> renamedSignal;
 };
 
-class OBSBasic : public OBSMainWindow {
+class OBSBasic : public OBSMainWindow, public IMainWindow {
 	Q_OBJECT
 
 	friend class OBSBasicPreview;
@@ -762,6 +764,25 @@ public:
 
 private:
 	std::unique_ptr<Ui::OBSBasic> ui;
+
+public:
+
+	int getSceneCount();
+	OBSScene getScene(int index);
+	QMainWindow* getWindow();
+	OBSWeakSource getProgramScene();
+	int getTransitionCount();
+	OBSSource getTransition(int index);
+	void openSceneCollection(const char* collection);
+	void setCurrentProfile(const char* profile);
+	bool isStreamingActive();
+	bool isRecordingActive();
+	bool isReplayBufferActive();
+	void* addToolsMenuAction(const char *name);
+	void addToolsMenuItem(const char *name, obs_frontend_cb callback, void *private_data);
+	std::unique_ptr<BasicOutputHandler>& getOutputHandler();
+	config_t *getProfileConfig();
+	bool isPreviewEnabled();
 };
 
 class ColorSelect : public QWidget {

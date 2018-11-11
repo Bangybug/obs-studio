@@ -283,6 +283,7 @@
     <ClInclude Include="forms\ui-broadcastwindow.hpp" />
     <ClInclude Include="forms\ui-chatpane.hpp" />
     <ClInclude Include="forms\ui-previewpane.hpp" />
+    <ClInclude Include="hack\imainwindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\build\deps\blake2\blake2.vcxproj">
