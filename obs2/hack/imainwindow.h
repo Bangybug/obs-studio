@@ -3,6 +3,18 @@
 #include <obs.hpp>
 #include <obs-frontend-api.h>
 #include <window-basic-main-outputs.hpp>
+#include <QSystemTrayIcon>
+
+typedef struct PreviewInfo {
+	float scale = 0.0f;
+	int x = 0, y = 0;
+	gs_vertbuffer_t *boxLeft = nullptr;
+	gs_vertbuffer_t *boxTop = nullptr;
+	gs_vertbuffer_t *boxRight = nullptr;
+	gs_vertbuffer_t *boxBottom = nullptr;
+	gs_vertbuffer_t *box = nullptr;
+	gs_vertbuffer_t *circle = nullptr;
+} SPreviewInfo;
 
 class IMainWindow
 {
@@ -18,6 +30,8 @@ public:
 	virtual OBSSource GetProgramSource() = 0;
 
 	virtual OBSWeakSource getProgramScene() = 0;
+
+	virtual OBSScene GetCurrentScene()=0;
 
 	virtual OBSSource GetCurrentSceneSource() = 0;
 
@@ -69,6 +83,14 @@ public:
 
 	virtual void SetCurrentScene(OBSSource scene, bool force = false,
 		bool direct = false) = 0;
+
+	virtual float getPreviewScale()=0;
+
+	virtual SPreviewInfo& getPreviewInfo()=0;
+
+	virtual config_t *Config() const =0;
+
+	virtual void SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n)=0;
 
 };
 

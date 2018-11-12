@@ -8,6 +8,7 @@
 #include "window-basic-preview.hpp"
 #include "window-basic-main.hpp"
 #include "obs-app.hpp"
+#include "../obs2/hack/imainwindow.h"
 
 #define HANDLE_RADIUS     4.0f
 #define HANDLE_SEL_RADIUS (HANDLE_RADIUS * 1.5f)
@@ -23,13 +24,13 @@ OBSBasicPreview::OBSBasicPreview(QWidget *parent, Qt::WindowFlags flags)
 
 vec2 OBSBasicPreview::GetMouseEventPos(QMouseEvent *event)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
-	float pixelRatio = main->devicePixelRatio();
-	float scale = pixelRatio / main->previewScale;
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
+	float pixelRatio = main->getWindow()->devicePixelRatio();
+	float scale = pixelRatio / main->getPreviewScale();
 	vec2 pos;
 	vec2_set(&pos,
-		(float(event->x()) - main->previewX / pixelRatio) * scale,
-		(float(event->y()) - main->previewY / pixelRatio) * scale);
+		(float(event->x()) - main->getPreviewInfo().x / pixelRatio) * scale,
+		(float(event->y()) - main->getPreviewInfo().y / pixelRatio) * scale);
 
 	return pos;
 }
@@ -129,7 +130,7 @@ static inline vec2 GetOBSScreenSize()
 
 vec3 OBSBasicPreview::GetSnapOffset(const vec3 &tl, const vec3 &br)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 	vec2 screenSize = GetOBSScreenSize();
 	vec3 clampOffset;
 
@@ -146,7 +147,7 @@ vec3 OBSBasicPreview::GetSnapOffset(const vec3 &tl, const vec3 &br)
 			"BasicWindow", "CenterSnapping");
 
 	const float clampDist = config_get_double(GetGlobalConfig(),
-			"BasicWindow", "SnapDistance") / main->previewScale;
+			"BasicWindow", "SnapDistance") / main->getPreviewScale();
 	const float centerX = br.x - (br.x - tl.x) / 2.0f;
 	const float centerY = br.y - (br.y - tl.y) / 2.0f;
 
@@ -185,7 +186,7 @@ vec3 OBSBasicPreview::GetSnapOffset(const vec3 &tl, const vec3 &br)
 
 OBSSceneItem OBSBasicPreview::GetItemAtPos(const vec2 &pos, bool selectBelow)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	OBSScene scene = main->GetCurrentScene();
 	if (!scene)
@@ -243,7 +244,7 @@ static bool CheckItemSelected(obs_scene_t *scene, obs_sceneitem_t *item,
 
 bool OBSBasicPreview::SelectedAtPos(const vec2 &pos)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	OBSScene scene = main->GetCurrentScene();
 	if (!scene)
@@ -363,13 +364,13 @@ static vec2 GetItemSize(obs_sceneitem_t *item)
 
 void OBSBasicPreview::GetStretchHandleData(const vec2 &pos)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	OBSScene scene = main->GetCurrentScene();
 	if (!scene)
 		return;
 
-	float scale = main->previewScale / main->devicePixelRatio();
+	float scale = main->getPreviewScale() / main->getWindow()->devicePixelRatio();
 	vec2 scaled_pos = pos;
 	vec2_divf(&scaled_pos, &scaled_pos, scale);
 	HandleFindData data(scaled_pos, scale);
@@ -490,10 +491,10 @@ void OBSBasicPreview::mousePressEvent(QMouseEvent *event)
 		return;
 	}
 
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
-	float pixelRatio = main->devicePixelRatio();
-	float x = float(event->x()) - main->previewX / pixelRatio;
-	float y = float(event->y()) - main->previewY / pixelRatio;
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
+	float pixelRatio = main->getWindow()->devicePixelRatio();
+	float x = float(event->x()) - main->getPreviewInfo().x / pixelRatio;
+	float y = float(event->y()) - main->getPreviewInfo().y / pixelRatio;
 	Qt::KeyboardModifiers modifiers = QGuiApplication::keyboardModifiers();
 	bool altDown = (modifiers & Qt::AltModifier);
 
@@ -512,7 +513,7 @@ void OBSBasicPreview::mousePressEvent(QMouseEvent *event)
 	vec2_set(&startPos, x, y);
 	GetStretchHandleData(startPos);
 
-	vec2_divf(&startPos, &startPos, main->previewScale / pixelRatio);
+	vec2_divf(&startPos, &startPos, main->getPreviewScale() / pixelRatio);
 	startPos.x = std::round(startPos.x);
 	startPos.y = std::round(startPos.y);
 
@@ -535,7 +536,7 @@ static bool select_one(obs_scene_t *scene, obs_sceneitem_t *item, void *param)
 
 void OBSBasicPreview::DoSelect(const vec2 &pos)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	OBSScene     scene = main->GetCurrentScene();
 	OBSSceneItem item  = GetItemAtPos(pos, true);
@@ -713,7 +714,7 @@ static bool GetSourceSnapOffset(obs_scene_t *scene, obs_sceneitem_t *item,
 
 void OBSBasicPreview::SnapItemMovement(vec2 &offset)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 	OBSScene scene = main->GetCurrentScene();
 
 	SelectedItemBounds data;
@@ -739,7 +740,7 @@ void OBSBasicPreview::SnapItemMovement(vec2 &offset)
 	}
 
 	const float clampDist = config_get_double(GetGlobalConfig(),
-			"BasicWindow", "SnapDistance") / main->previewScale;
+			"BasicWindow", "SnapDistance") / main->getPreviewScale();
 
 	OffsetData offsetData;
 	offsetData.clampDist = clampDist;
@@ -793,7 +794,7 @@ static bool move_items(obs_scene_t *scene, obs_sceneitem_t *item, void *param)
 void OBSBasicPreview::MoveItems(const vec2 &pos)
 {
 	Qt::KeyboardModifiers modifiers = QGuiApplication::keyboardModifiers();
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 	OBSScene scene = main->GetCurrentScene();
 
 	vec2 offset, moveOffset;
@@ -1146,7 +1147,7 @@ void OBSBasicPreview::mouseMoveEvent(QMouseEvent *event)
 		pos.y = std::round(pos.y);
 
 		if (stretchHandle != ItemHandle::None) {
-			OBSBasic *main = reinterpret_cast<OBSBasic*>(
+			IMainWindow *main = reinterpret_cast<IMainWindow*>(
 					App()->GetMainWindow());
 			OBSScene scene = main->GetCurrentScene();
 			obs_sceneitem_t *group = obs_sceneitem_get_group(
@@ -1220,7 +1221,7 @@ bool OBSBasicPreview::DrawSelectedItem(obs_scene_t *scene,
 	if (!obs_sceneitem_selected(item))
 		return true;
 
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	matrix4 boxTransform;
 	matrix4 invBoxTransform;
@@ -1249,7 +1250,7 @@ bool OBSBasicPreview::DrawSelectedItem(obs_scene_t *scene,
 	obs_transform_info info;
 	obs_sceneitem_get_info(item, &info);
 
-	gs_load_vertexbuffer(main->circle);
+	gs_load_vertexbuffer(main->getPreviewInfo().circle);
 
 	gs_matrix_push();
 	gs_matrix_mul(&boxTransform);
@@ -1280,13 +1281,13 @@ bool OBSBasicPreview::DrawSelectedItem(obs_scene_t *scene,
 		gs_load_vertexbuffer(main->vb); \
 		gs_draw(GS_LINESTRIP, 0, 0);
 
-		DRAW_SIDE(left,   boxLeft);
-		DRAW_SIDE(top,    boxTop);
-		DRAW_SIDE(right,  boxRight);
-		DRAW_SIDE(bottom, boxBottom);
+		DRAW_SIDE(left, getPreviewInfo().boxLeft);
+		DRAW_SIDE(top, getPreviewInfo().boxTop);
+		DRAW_SIDE(right, getPreviewInfo().boxRight);
+		DRAW_SIDE(bottom, getPreviewInfo().boxBottom);
 #undef DRAW_SIDE
 	} else {
-		gs_load_vertexbuffer(main->box);
+		gs_load_vertexbuffer(main->getPreviewInfo().box);
 		gs_draw(GS_LINESTRIP, 0, 0);
 	}
 
@@ -1302,7 +1303,7 @@ void OBSBasicPreview::DrawSceneEditing()
 	if (locked)
 		return;
 
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 
 	gs_effect_t    *solid = obs_get_base_effect(OBS_EFFECT_SOLID);
 	gs_technique_t *tech  = gs_effect_get_technique(solid, "Solid");
@@ -1318,7 +1319,7 @@ void OBSBasicPreview::DrawSceneEditing()
 
 	if (scene) {
 		gs_matrix_push();
-		gs_matrix_scale3f(main->previewScale, main->previewScale, 1.0f);
+		gs_matrix_scale3f(main->getPreviewScale(), main->getPreviewScale(), 1.0f);
 		obs_scene_enum_items(scene, DrawSelectedItem, this);
 		gs_matrix_pop();
 	}
@@ -1345,3 +1346,4 @@ void OBSBasicPreview::SetScalingAmount(float newScalingAmountVal) {
 	scrollingOffset.y *= newScalingAmountVal / scalingAmount;
 	scalingAmount = newScalingAmountVal;
 }
+

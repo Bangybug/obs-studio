@@ -163,19 +163,19 @@ private:
 	bool recordingStopping = false;
 	bool replayBufferStopping = false;
 
-	gs_vertbuffer_t *box = nullptr;
-	gs_vertbuffer_t *boxLeft = nullptr;
-	gs_vertbuffer_t *boxTop = nullptr;
-	gs_vertbuffer_t *boxRight = nullptr;
-	gs_vertbuffer_t *boxBottom = nullptr;
-	gs_vertbuffer_t *circle = nullptr;
+	gs_vertbuffer_t *&box = previewInfo.box;
+	gs_vertbuffer_t *&boxLeft = previewInfo.boxLeft;
+	gs_vertbuffer_t *&boxTop = previewInfo.boxTop;
+	gs_vertbuffer_t *&boxRight = previewInfo.boxRight;
+	gs_vertbuffer_t *&boxBottom = previewInfo.boxBottom;
+	gs_vertbuffer_t *&circle = previewInfo.circle;
 
 	bool          sceneChanging = false;
 	bool          ignoreSelectionUpdate = false;
 
-	int           previewX = 0,  previewY = 0;
+	int           &previewX = previewInfo.x,  &previewY = previewInfo.y;
 	int           previewCX = 0, previewCY = 0;
-	float         previewScale = 0.0f;
+	float         &previewScale = previewInfo.scale;
 
 	ConfigFile    basicConfig;
 
@@ -766,6 +766,7 @@ private:
 	std::unique_ptr<Ui::OBSBasic> ui;
 
 public:
+	SPreviewInfo previewInfo;
 
 	int getSceneCount();
 	OBSScene getScene(int index);
@@ -783,6 +784,8 @@ public:
 	std::unique_ptr<BasicOutputHandler>& getOutputHandler();
 	config_t *getProfileConfig();
 	bool isPreviewEnabled();
+	float getPreviewScale();
+	SPreviewInfo& getPreviewInfo();
 };
 
 class ColorSelect : public QWidget {

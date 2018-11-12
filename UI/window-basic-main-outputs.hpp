@@ -2,7 +2,7 @@
 
 #include <string>
 
-class OBSBasic;
+class IMainWindow;
 
 struct BasicOutputHandler {
 	OBSOutput              fileOutput;
@@ -12,7 +12,7 @@ struct BasicOutputHandler {
 	bool                   recordingActive = false;
 	bool                   delayActive = false;
 	bool                   replayBufferActive = false;
-	OBSBasic               *main;
+	IMainWindow *main;
 
 	std::string            outputType;
 
@@ -27,7 +27,7 @@ struct BasicOutputHandler {
 	OBSSignal              recordStopping;
 	OBSSignal              replayBufferStopping;
 
-	inline BasicOutputHandler(OBSBasic *main_) : main(main_) {}
+	inline BasicOutputHandler(IMainWindow *main_) : main(main_) {}
 
 	virtual ~BasicOutputHandler() {};
 
@@ -50,5 +50,5 @@ struct BasicOutputHandler {
 	}
 };
 
-BasicOutputHandler *CreateSimpleOutputHandler(OBSBasic *main);
-BasicOutputHandler *CreateAdvancedOutputHandler(OBSBasic *main);
+BasicOutputHandler *CreateSimpleOutputHandler(IMainWindow *main);
+BasicOutputHandler *CreateAdvancedOutputHandler(IMainWindow *main);

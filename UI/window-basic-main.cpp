@@ -6927,3 +6927,12 @@ bool OBSBasic::isPreviewEnabled()
 	return previewEnabled;
 }
 
+float OBSBasic::getPreviewScale()
+{
+	return previewScale;
+}
+
+SPreviewInfo& OBSBasic::getPreviewInfo()
+{
+	return previewInfo;
+}

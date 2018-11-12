@@ -163,14 +163,9 @@ std::unique_ptr<BasicOutputHandler>& BroadcastWindow::getOutputHandler()
 
 config_t *BroadcastWindow::getProfileConfig()
 {
-// return main->basicConfig;
-	return nullptr;
+	return basicConfig;
 }
 
-
-void BroadcastWindow::SaveProject()
-{
-}
 
 void BroadcastWindow::SetService(obs_service_t *newService)
 {
@@ -241,21 +236,199 @@ OBSSource BroadcastWindow::GetProgramSource()
 	return nullptr;
 }
 
+void BroadcastWindow::TransitionToScene(OBSScene scene, bool force, bool direct)
+{
+
+}
+
+void BroadcastWindow::TransitionToScene(OBSSource scene, bool force, bool direct, bool quickTransition)
+{
+
+}
+
+
+void BroadcastWindow::SetCurrentScene(OBSSource scene, bool force, bool direct)
+{
+
+}
+
+
+float BroadcastWindow::getPreviewScale()
+{
+	return previewScale;
+}
+
+
+SPreviewInfo& BroadcastWindow::getPreviewInfo()
+{
+	return previewInfo;
+}
+
+config_t *BroadcastWindow::Config() const
+{
+	return basicConfig;
+}
+
+void BroadcastWindow::SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n)
+{
+}
+
+
+void BroadcastWindow::DeferSaveBegin()
+{
+	os_atomic_inc_long(&disableSaving);
+}
+
+
+void BroadcastWindow::DeferSaveEnd()
+{
+	long result = os_atomic_dec_long(&disableSaving);
+	if (result == 0) {
+		SaveProject();
+	}
+}
+
+
+void BroadcastWindow::StartStreaming()
+{
+	if (outputHandler->StreamingActive())
+		return;
+	if (disableOutputsRef)
+		return;
+
+	if (api)
+		api->on_event(OBS_FRONTEND_EVENT_STREAMING_STARTING);
+
+	SaveProject();
+
+	ui->streamButton->setEnabled(false);
+	ui->streamButton->setText(QTStr("Basic.Main.Connecting"));
+
+	if (sysTrayStream) {
+		sysTrayStream->setEnabled(false);
+		sysTrayStream->setText(ui->streamButton->text());
+	}
+
+	if (!outputHandler->StartStreaming(service)) {
+		ui->streamButton->setText(QTStr("Basic.Main.StartStreaming"));
+		ui->streamButton->setEnabled(true);
+		ui->streamButton->setChecked(false);
+
+		if (sysTrayStream) {
+			sysTrayStream->setText(ui->streamButton->text());
+			sysTrayStream->setEnabled(true);
+		}
+
+		QMessageBox::critical(this,
+			QTStr("Output.StartStreamFailed"),
+			QTStr("Output.StartFailedGeneric"));
+		return;
+	}
+
+	bool recordWhenStreaming = config_get_bool(GetGlobalConfig(),
+		"BasicWindow", "RecordWhenStreaming");
+	if (recordWhenStreaming)
+		StartRecording();
+
+	bool replayBufferWhileStreaming = config_get_bool(GetGlobalConfig(),
+		"BasicWindow", "ReplayBufferWhileStreaming");
+	if (replayBufferWhileStreaming)
+		StartReplayBuffer();
+}
+
+void BroadcastWindow::StopStreaming()
+{
+}
+
+void BroadcastWindow::StreamDelayStarting(int sec)
+{
+}
+
+void BroadcastWindow::StreamDelayStopping(int sec)
+{
+}
+
+void BroadcastWindow::StreamingStart()
+{
+}
+
+void BroadcastWindow::StreamStopping()
+{
+}
+
+void BroadcastWindow::StreamingStop(int errorcode, QString last_error)
+{
+}
+
+void BroadcastWindow::StartRecording()
+{
+}
+
+void BroadcastWindow::StopRecording()
+{
+}
+
+void BroadcastWindow::RecordingStart()
+{
+}
+
+void BroadcastWindow::RecordStopping()
+{
+}
+
+void BroadcastWindow::RecordingStop(int code)
+{
+}
+
+void BroadcastWindow::StartReplayBuffer()
+{
+}
+
+void BroadcastWindow::StopReplayBuffer()
+{
+}
+
+void BroadcastWindow::ReplayBufferStart()
+{
+}
+
+void BroadcastWindow::ReplayBufferSave()
+{
+}
+
+void BroadcastWindow::ReplayBufferStopping()
+{
+}
+
+void BroadcastWindow::ReplayBufferStop(int code)
+{
+}
+
+void BroadcastWindow::SaveProject()
+{
+}
+
+void BroadcastWindow::SetTransition(OBSSource transition)
+{
+}
+
 void BroadcastWindow::TransitionToScene(OBSScene scene, bool force = false,
 	bool direct = false)
 {
-
 }
 
 void BroadcastWindow::TransitionToScene(OBSSource scene, bool force = false,
 	bool direct = false, bool quickTransition = false)
 {
-
 }
-
 
 void BroadcastWindow::SetCurrentScene(OBSSource scene, bool force = false,
 	bool direct = false)
 {
+}
 
+bool BroadcastWindow::AddSceneCollection(
+	bool create_new,
+	const QString &name = QString())
+{
 }

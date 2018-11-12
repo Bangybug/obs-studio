@@ -9,6 +9,7 @@
 #include <obs.hpp>
 #include <obs-frontend-api.h>
 #include <window-basic-main-outputs.hpp>
+#include <util/util.hpp>
 
 class BroadcastWindow : public IMainWindow, public QMainWindow {
 	Q_OBJECT
@@ -18,6 +19,12 @@ private:
 	OBSService service;
 	bool previewEnabled = true;
 	long disableSaving = 1;
+	float previewScale = 0.0f;
+	SPreviewInfo previewInfo;
+	ConfigFile    basicConfig;
+	std::unique_ptr<BasicOutputHandler> outputHandler;
+	int disableOutputsRef = 0;
+
 public:
 	BroadcastWindow(QWidget *parent);
 	virtual ~BroadcastWindow() {}
@@ -36,7 +43,7 @@ public:
 		return this;
 	}
 
-	// TODO TransitionToScene
+	// TransitionToScene
 	// SetCurrentScene
 	// SetTransition
 	// AddSceneCollection
@@ -50,6 +57,17 @@ public:
 	// DeferSaveBegin
 	// DeferSaveEnd
 	// SetCurrentScene
+	// StreamDelayStarting
+	// StreamStopping
+	// StreamDelayStopping
+	// StreamingStart
+	// StreamingStop
+	// RecordingStart
+	// RecordingStop
+	// RecordStopping
+	// ReplayBufferStart
+	// ReplayBufferStop
+	// ReplayBufferStopping
 
 	OBSWeakSource getProgramScene();
 	OBSSource GetCurrentSceneSource();
@@ -74,8 +92,6 @@ public:
 
 	config_t *getProfileConfig();
 
-	void SaveProject();
-
 	void SetService(obs_service_t *service);
 
 	obs_service_t *GetService();
@@ -95,6 +111,49 @@ public:
 
 	OBSSource GetProgramSource();
 
+	float getPreviewScale();
+
+	SPreviewInfo& getPreviewInfo();
+
+	config_t *Config() const;
+
+	void SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n);
+
+public slots:
+
+	void DeferSaveBegin();
+	void DeferSaveEnd();
+
+	void StartStreaming();
+	void StopStreaming();
+	//void ForceStopStreaming();
+
+	void StreamDelayStarting(int sec);
+	void StreamDelayStopping(int sec);
+
+	void StreamingStart();
+	void StreamStopping();
+	void StreamingStop(int errorcode, QString last_error);
+
+	void StartRecording();
+	void StopRecording();
+
+	void RecordingStart();
+	void RecordStopping();
+	void RecordingStop(int code);
+
+	void StartReplayBuffer();
+	void StopReplayBuffer();
+
+	void ReplayBufferStart();
+	void ReplayBufferSave();
+	void ReplayBufferStopping();
+	void ReplayBufferStop(int code);
+
+	//void SaveProjectDeferred();
+	void SaveProject();
+
+	void SetTransition(OBSSource transition);
 	void TransitionToScene(OBSScene scene, bool force = false,
 		bool direct = false);
 	void TransitionToScene(OBSSource scene, bool force = false,
@@ -102,6 +161,9 @@ public:
 	void SetCurrentScene(OBSSource scene, bool force = false,
 		bool direct = false);
 
+	bool AddSceneCollection(
+		bool create_new,
+		const QString &name = QString());
 
 private:
 	std::unique_ptr<Ui::BroadcastWindow> ui;

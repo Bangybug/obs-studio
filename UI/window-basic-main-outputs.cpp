@@ -18,7 +18,7 @@ static void OBSStreamStarting(void *data, calldata_t *params)
 		return;
 
 	output->delayActive = true;
-	QMetaObject::invokeMethod(output->main,
+	QMetaObject::invokeMethod(output->main->getWindow(),
 			"StreamDelayStarting", Q_ARG(int, sec));
 }
 
@@ -29,9 +29,9 @@ static void OBSStreamStopping(void *data, calldata_t *params)
 
 	int sec = (int)obs_output_get_active_delay(obj);
 	if (sec == 0)
-		QMetaObject::invokeMethod(output->main, "StreamStopping");
+		QMetaObject::invokeMethod(output->main->getWindow(), "StreamStopping");
 	else
-		QMetaObject::invokeMethod(output->main,
+		QMetaObject::invokeMethod(output->main->getWindow(),
 				"StreamDelayStopping", Q_ARG(int, sec));
 }
 
@@ -39,7 +39,7 @@ static void OBSStartStreaming(void *data, calldata_t *params)
 {
 	BasicOutputHandler *output = static_cast<BasicOutputHandler*>(data);
 	output->streamingActive = true;
-	QMetaObject::invokeMethod(output->main, "StreamingStart");
+	QMetaObject::invokeMethod(output->main->getWindow(), "StreamingStart");
 
 	UNUSED_PARAMETER(params);
 }
@@ -54,7 +54,7 @@ static void OBSStopStreaming(void *data, calldata_t *params)
 
 	output->streamingActive = false;
 	output->delayActive = false;
-	QMetaObject::invokeMethod(output->main,
+	QMetaObject::invokeMethod(output->main->getWindow(),
 			"StreamingStop", Q_ARG(int, code), Q_ARG(QString, arg_last_error));
 }
 
@@ -63,7 +63,7 @@ static void OBSStartRecording(void *data, calldata_t *params)
 	BasicOutputHandler *output = static_cast<BasicOutputHandler*>(data);
 
 	output->recordingActive = true;
-	QMetaObject::invokeMethod(output->main, "RecordingStart");
+	QMetaObject::invokeMethod(output->main->getWindow(), "RecordingStart");
 
 	UNUSED_PARAMETER(params);
 }
@@ -74,7 +74,7 @@ static void OBSStopRecording(void *data, calldata_t *params)
 	int code = (int)calldata_int(params, "code");
 
 	output->recordingActive = false;
-	QMetaObject::invokeMethod(output->main,
+	QMetaObject::invokeMethod(output->main->getWindow(),
 			"RecordingStop", Q_ARG(int, code));
 
 	UNUSED_PARAMETER(params);
@@ -83,7 +83,7 @@ static void OBSStopRecording(void *data, calldata_t *params)
 static void OBSRecordStopping(void *data, calldata_t *params)
 {
 	BasicOutputHandler *output = static_cast<BasicOutputHandler*>(data);
-	QMetaObject::invokeMethod(output->main, "RecordStopping");
+	QMetaObject::invokeMethod(output->main->getWindow(), "RecordStopping");
 
 	UNUSED_PARAMETER(params);
 }
@@ -93,7 +93,7 @@ static void OBSStartReplayBuffer(void *data, calldata_t *params)
 	BasicOutputHandler *output = static_cast<BasicOutputHandler*>(data);
 
 	output->replayBufferActive = true;
-	QMetaObject::invokeMethod(output->main, "ReplayBufferStart");
+	QMetaObject::invokeMethod(output->main->getWindow(), "ReplayBufferStart");
 
 	UNUSED_PARAMETER(params);
 }
@@ -104,7 +104,7 @@ static void OBSStopReplayBuffer(void *data, calldata_t *params)
 	int code = (int)calldata_int(params, "code");
 
 	output->replayBufferActive = false;
-	QMetaObject::invokeMethod(output->main,
+	QMetaObject::invokeMethod(output->main->getWindow(),
 			"ReplayBufferStop", Q_ARG(int, code));
 
 	UNUSED_PARAMETER(params);
@@ -113,7 +113,7 @@ static void OBSStopReplayBuffer(void *data, calldata_t *params)
 static void OBSReplayBufferStopping(void *data, calldata_t *params)
 {
 	BasicOutputHandler *output = static_cast<BasicOutputHandler*>(data);
-	QMetaObject::invokeMethod(output->main, "ReplayBufferStopping");
+	QMetaObject::invokeMethod(output->main->getWindow(), "ReplayBufferStopping");
 
 	UNUSED_PARAMETER(params);
 }
@@ -192,7 +192,7 @@ struct SimpleOutput : BasicOutputHandler {
 	bool                   ffmpegOutput = false;
 	bool                   lowCPUx264 = false;
 
-	SimpleOutput(OBSBasic *main_);
+	SimpleOutput(IMainWindow *main_);
 
 	int CalcCRF(int crf);
 
@@ -311,7 +311,7 @@ void SimpleOutput::LoadRecordingPreset()
 	}
 }
 
-SimpleOutput::SimpleOutput(OBSBasic *main_) : BasicOutputHandler(main_)
+SimpleOutput::SimpleOutput(IMainWindow *main_) : BasicOutputHandler(main_)
 {
 	const char *encoder = config_get_string(main->Config(), "SimpleOutput",
 			"StreamEncoder");
@@ -847,8 +847,8 @@ bool SimpleOutput::ConfigureRecording(bool updateReplayBuffer)
 	os_dir_t *dir = path && path[0] ? os_opendir(path) : nullptr;
 
 	if (!dir) {
-		if (main->isVisible())
-			OBSMessageBox::information(main,
+		if (main->getWindow()->isVisible())
+			OBSMessageBox::information(main->getWindow(),
 					QTStr("Output.BadPath.Title"),
 					QTStr("Output.BadPath.Text"));
 		else
@@ -927,7 +927,7 @@ bool SimpleOutput::StartRecording()
 			error_reason = QT_UTF8(error);
 		else
 			error_reason = QTStr("Output.StartFailedGeneric");
-		QMessageBox::critical(main,
+		QMessageBox::critical(main->getWindow(),
 			QTStr("Output.StartRecordingFailed"),
 			error_reason);
 		return false;
@@ -942,7 +942,7 @@ bool SimpleOutput::StartReplayBuffer()
 	if (!ConfigureRecording(true))
 		return false;
 	if (!obs_output_start(replayBuffer)) {
-		QMessageBox::critical(main,
+		QMessageBox::critical(main->getWindow(),
 				QTStr("Output.StartReplayFailed"),
 				QTStr("Output.StartFailedGeneric"));
 		return false;
@@ -1006,7 +1006,7 @@ struct AdvancedOutput : BasicOutputHandler {
 
 	string                 aacEncoderID[MAX_AUDIO_MIXES];
 
-	AdvancedOutput(OBSBasic *main_);
+	AdvancedOutput(IMainWindow *main_);
 
 	inline void UpdateStreamSettings();
 	inline void UpdateRecordingSettings();
@@ -1061,7 +1061,7 @@ static void ApplyEncoderDefaults(OBSData &settings,
 	settings = std::move(dataRet);
 }
 
-AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
+AdvancedOutput::AdvancedOutput(IMainWindow *main_) : BasicOutputHandler(main_)
 {
 	const char *recType = config_get_string(main->Config(), "AdvOut",
 			"RecType");
@@ -1585,8 +1585,8 @@ bool AdvancedOutput::StartRecording()
 		os_dir_t *dir = path && path[0] ? os_opendir(path) : nullptr;
 
 		if (!dir) {
-			if (main->isVisible())
-				OBSMessageBox::information(main,
+			if (main->getWindow()->isVisible())
+				OBSMessageBox::information(main->getWindow(),
 						QTStr("Output.BadPath.Title"),
 						QTStr("Output.BadPath.Text"));
 			else
@@ -1627,7 +1627,7 @@ bool AdvancedOutput::StartRecording()
 			error_reason = QT_UTF8(error);
 		else
 			error_reason = QTStr("Output.StartFailedGeneric");
-		QMessageBox::critical(main,
+		QMessageBox::critical(main->getWindow(),
 				QTStr("Output.StartRecordingFailed"),
 				error_reason);
 		return false;
@@ -1685,8 +1685,8 @@ bool AdvancedOutput::StartReplayBuffer()
 		os_dir_t *dir = path && path[0] ? os_opendir(path) : nullptr;
 
 		if (!dir) {
-			if (main->isVisible())
-				OBSMessageBox::information(main,
+			if (main->getWindow()->isVisible())
+				OBSMessageBox::information(main->getWindow(),
 						QTStr("Output.BadPath.Title"),
 						QTStr("Output.BadPath.Text"));
 			else
@@ -1743,7 +1743,7 @@ bool AdvancedOutput::StartReplayBuffer()
 	}
 
 	if (!obs_output_start(replayBuffer)) {
-		QMessageBox::critical(main,
+		QMessageBox::critical(main->getWindow(),
 				QTStr("Output.StartRecordingFailed"),
 				QTStr("Output.StartFailedGeneric"));
 		return false;
@@ -1793,12 +1793,12 @@ bool AdvancedOutput::ReplayBufferActive() const
 
 /* ------------------------------------------------------------------------ */
 
-BasicOutputHandler *CreateSimpleOutputHandler(OBSBasic *main)
+BasicOutputHandler *CreateSimpleOutputHandler(IMainWindow *main)
 {
 	return new SimpleOutput(main);
 }
 
-BasicOutputHandler *CreateAdvancedOutputHandler(OBSBasic *main)
+BasicOutputHandler *CreateAdvancedOutputHandler(IMainWindow *main)
 {
 	return new AdvancedOutput(main);
 }

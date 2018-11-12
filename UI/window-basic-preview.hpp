@@ -6,7 +6,6 @@
 #include "qt-display.hpp"
 #include "obs-app.hpp"
 
-class OBSBasic;
 class QMouseEvent;
 
 #define ITEM_LEFT   (1<<0)
