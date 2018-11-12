@@ -87,7 +87,7 @@ OBSAdvAudioCtrl::OBSAdvAudioCtrl(QGridLayout *, obs_source_t *source_)
 	balance->setTickPosition(QSlider::TicksAbove);
 	balance->setTickInterval(50);
 
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	OBSMainWindow *main = reinterpret_cast<OBSMainWindow*>(App()->GetMainWindow());
 
 	const char *speakers = config_get_string(main->Config(), "Audio",
 			"ChannelSetup");

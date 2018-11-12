@@ -1501,7 +1501,7 @@ string GenerateTimeDateFilename(const char *extension, bool noSpace)
 string GenerateSpecifiedFilename(const char *extension, bool noSpace,
 		const char *format)
 {
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	OBSMainWindow *main = reinterpret_cast<OBSMainWindow*>(App()->GetMainWindow());
 	bool autoRemux = config_get_bool(main->Config(), "Video", "AutoRemux");
 
 	if ((strcmp(extension, "mp4") == 0) && autoRemux)

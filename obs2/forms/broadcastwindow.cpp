@@ -236,3 +236,26 @@ void BroadcastWindow::EnablePreviewDisplay(bool enabled)
 	*/
 }
 
+OBSSource BroadcastWindow::GetProgramSource()
+{
+	return nullptr;
+}
+
+void BroadcastWindow::TransitionToScene(OBSScene scene, bool force = false,
+	bool direct = false)
+{
+
+}
+
+void BroadcastWindow::TransitionToScene(OBSSource scene, bool force = false,
+	bool direct = false, bool quickTransition = false)
+{
+
+}
+
+
+void BroadcastWindow::SetCurrentScene(OBSSource scene, bool force = false,
+	bool direct = false)
+{
+
+}

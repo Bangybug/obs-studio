@@ -288,7 +288,7 @@ void OBSProjector::OBSRenderMultiview(void *data, uint32_t cx, uint32_t cy)
 	if (updatingMultiview || !window->ready)
 		return;
 
-	OBSBasic     *main   = (OBSBasic *)obs_frontend_get_main_window();
+	IMainWindow     *main   = (IMainWindow *)obs_frontend_get_main_window();
 	uint32_t     targetCX, targetCY;
 	int          x, y;
 	float        scale;
@@ -636,7 +636,7 @@ void OBSProjector::OBSRender(void *data, uint32_t cx, uint32_t cy)
 	if (!window->ready)
 		return;
 
-	OBSBasic *main = reinterpret_cast<OBSBasic*>(App()->GetMainWindow());
+	IMainWindow *main = reinterpret_cast<IMainWindow*>(App()->GetMainWindow());
 	OBSSource source = window->source;
 
 	uint32_t targetCX;
@@ -814,7 +814,7 @@ void OBSProjector::mouseDoubleClickEvent(QMouseEvent *event)
 	if (!transitionOnDoubleClick)
 		return;
 
-	OBSBasic *main = (OBSBasic*)obs_frontend_get_main_window();
+	IMainWindow *main = (IMainWindow*)obs_frontend_get_main_window();
 	if (!main->IsPreviewProgramMode())
 		return;
 
@@ -852,7 +852,7 @@ void OBSProjector::mousePressEvent(QMouseEvent *event)
 		if (!src)
 			return;
 
-		OBSBasic *main = (OBSBasic*)obs_frontend_get_main_window();
+		IMainWindow *main = (IMainWindow*)obs_frontend_get_main_window();
 		if (main->GetCurrentSceneSource() != src)
 			main->SetCurrentScene(src, false);
 	}

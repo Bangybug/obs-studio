@@ -15,6 +15,8 @@ public:
 
 	virtual QMainWindow* getWindow() = 0;
 
+	virtual OBSSource GetProgramSource() = 0;
+
 	virtual OBSWeakSource getProgramScene() = 0;
 
 	virtual OBSSource GetCurrentSceneSource() = 0;
@@ -58,5 +60,15 @@ public:
 	virtual void EnablePreviewDisplay(bool enabled)=0;
 
 	virtual bool SavingDisabled() const =0;
+
+	virtual void TransitionToScene(OBSScene scene, bool force = false,
+		bool direct = false) = 0;
+
+	virtual void TransitionToScene(OBSSource scene, bool force = false,
+		bool direct = false, bool quickTransition = false) = 0;
+
+	virtual void SetCurrentScene(OBSSource scene, bool force = false,
+		bool direct = false) = 0;
+
 };
 
