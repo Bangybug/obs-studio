@@ -10,8 +10,25 @@
 #include <obs-frontend-api.h>
 #include <window-basic-main-outputs.hpp>
 #include <util/util.hpp>
+#include <obs-frontend-internal.hpp>
+#include <window-main.hpp>
 
-class BroadcastWindow : public IMainWindow, public QMainWindow {
+#define DESKTOP_AUDIO_1 Str("DesktopAudioDevice1")
+#define DESKTOP_AUDIO_2 Str("DesktopAudioDevice2")
+#define AUX_AUDIO_1     Str("AuxAudioDevice1")
+#define AUX_AUDIO_2     Str("AuxAudioDevice2")
+#define AUX_AUDIO_3     Str("AuxAudioDevice3")
+#define AUX_AUDIO_4     Str("AuxAudioDevice4")
+
+#define SIMPLE_ENCODER_X264                    "x264"
+#define SIMPLE_ENCODER_X264_LOWCPU             "x264_lowcpu"
+#define SIMPLE_ENCODER_QSV                     "qsv"
+#define SIMPLE_ENCODER_NVENC                   "nvenc"
+#define SIMPLE_ENCODER_AMD                     "amd"
+
+#define PREVIEW_EDGE_SIZE 10
+
+class BroadcastWindow : public IMainWindow, public OBSMainWindow {
 	Q_OBJECT
 private:
 	volatile bool previewProgramMode = false;
@@ -24,10 +41,13 @@ private:
 	ConfigFile    basicConfig;
 	std::unique_ptr<BasicOutputHandler> outputHandler;
 	int disableOutputsRef = 0;
+	obs_frontend_callbacks *api = nullptr;
 
 public:
 	BroadcastWindow(QWidget *parent);
 	virtual ~BroadcastWindow() {}
+
+	void OBSInit();
 
 	int getSceneCount();
 
@@ -164,6 +184,15 @@ public slots:
 	bool AddSceneCollection(
 		bool create_new,
 		const QString &name = QString());
+
+	void ResetOutputs();
+
+
+	virtual int GetProfilePath(char *path, size_t size, const char *file)
+		const override;
+
+	bool InitBasicConfig();
+	bool InitBasicConfigDefaults();
 
 private:
 	std::unique_ptr<Ui::BroadcastWindow> ui;

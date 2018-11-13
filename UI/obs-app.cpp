@@ -1243,10 +1243,10 @@ bool OBSApp::OBSInit()
 
 	setQuitOnLastWindowClosed(false);
 
-	mainWindow = new OBSBasic();
+	mainWindow = new BroadcastWindow(0);
+	mainWindow->show();
 
-	broadcastWindow = new BroadcastWindow(0);
-	broadcastWindow->show();
+	//mainWindow = new OBSBasic();
 
 	mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));

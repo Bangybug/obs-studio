@@ -92,5 +92,7 @@ public:
 
 	virtual void SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n)=0;
 
+	virtual void OBSInit()=0;
+
 };
 

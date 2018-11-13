@@ -24,6 +24,9 @@ OBSMainWindow (window-main)
 
 * Оригинальный OBS стартует сразу, а тут нужно отложить старт до момента входа. Либо всё же сделать старт, но не показывать GUI. 
 
+* void BroadcastWindow::StartStreaming()  - recordWhenStreaming
+
+
 Всякое:
 
 "Cтрим с несколькими камерами из подручных материалов"
