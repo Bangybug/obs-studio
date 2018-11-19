@@ -5,11 +5,13 @@
 #include "../../UI/qt-wrappers.hpp"
 #include <qscreen.h>
 #include <platform.hpp>
+#include <volume-control.hpp>
+#include <item-widget-helpers.hpp>
 
 extern obs_frontend_callbacks *InitializeAPIInterface(IMainWindow *main);
 
 BroadcastWindow::BroadcastWindow(QWidget *parent)
-	: OBSMainWindow(parent),
+	: IMainWindow(parent),
 	ui(new Ui::BroadcastWindow)
 {
 	setAttribute(Qt::WA_NativeWindow);
@@ -39,6 +41,36 @@ static const double scaled_vals[] =
 	0.0
 };
 
+static void AddExtraModulePaths()
+{
+	char base_module_dir[512];
+#if defined(_WIN32) || defined(__APPLE__)
+	int ret = GetProgramDataPath(base_module_dir, sizeof(base_module_dir),
+		"obs-studio/plugins/%module%");
+#else
+	int ret = GetConfigPath(base_module_dir, sizeof(base_module_dir),
+		"obs-studio/plugins/%module%");
+#endif
+
+	if (ret <= 0)
+		return;
+
+	std::string path = (char*)base_module_dir;
+#if defined(__APPLE__)
+	obs_add_module_path((path + "/bin").c_str(), (path + "/data").c_str());
+
+	BPtr<char> config_bin = os_get_config_path_ptr("obs-studio/plugins/%module%/bin");
+	BPtr<char> config_data = os_get_config_path_ptr("obs-studio/plugins/%module%/data");
+	obs_add_module_path(config_bin, config_data);
+
+#elif ARCH_BITS == 64
+	obs_add_module_path((path + "/bin/64bit").c_str(),
+		(path + "/data").c_str());
+#else
+	obs_add_module_path((path + "/bin/32bit").c_str(),
+		(path + "/data").c_str());
+#endif
+}
 
 void BroadcastWindow::OBSInit()
 {
@@ -62,6 +94,37 @@ void BroadcastWindow::OBSInit()
 
 	if (!InitBasicConfig())
 		throw "Failed to load basic.ini";
+
+	if (!ResetAudio())
+		throw "Failed to initialize audio";
+
+	/* load audio monitoring */
+#if defined(_WIN32) || defined(__APPLE__) || HAVE_PULSEAUDIO
+	const char *device_name = config_get_string(basicConfig, "Audio",
+		"MonitoringDeviceName");
+	const char *device_id = config_get_string(basicConfig, "Audio",
+		"MonitoringDeviceId");
+
+	obs_set_audio_monitoring_device(device_name, device_id);
+
+	blog(LOG_INFO, "Audio monitoring device:\n\tname: %s\n\tid: %s",
+		device_name, device_id);
+#endif
+
+	InitOBSCallbacks();
+//	InitHotkeys();
+
+	AddExtraModulePaths();
+	blog(LOG_INFO, "---------------------------------");
+	obs_load_all_modules();
+	blog(LOG_INFO, "---------------------------------");
+	obs_log_loaded_modules();
+	blog(LOG_INFO, "---------------------------------");
+	obs_post_load_modules();
+
+#if defined(_WIN32) && defined(BROWSER_AVAILABLE)
+	create_browser_widget = obs_browser_init_panel();
+#endif
 
 	ResetOutputs();
 }
@@ -732,4 +795,154 @@ bool BroadcastWindow::InitBasicConfigDefaults()
 	config_set_default_uint(basicConfig, "Audio", "PeakMeterType", 0);
 
 	return true;
+}
+
+
+
+bool BroadcastWindow::ResetAudio()
+{
+	struct obs_audio_info ai;
+	ai.samples_per_sec = config_get_uint(basicConfig, "Audio",
+		"SampleRate");
+
+	const char *channelSetupStr = config_get_string(basicConfig,
+		"Audio", "ChannelSetup");
+
+	if (strcmp(channelSetupStr, "Mono") == 0)
+		ai.speakers = SPEAKERS_MONO;
+	else if (strcmp(channelSetupStr, "2.1") == 0)
+		ai.speakers = SPEAKERS_2POINT1;
+	else if (strcmp(channelSetupStr, "4.0") == 0)
+		ai.speakers = SPEAKERS_4POINT0;
+	else if (strcmp(channelSetupStr, "4.1") == 0)
+		ai.speakers = SPEAKERS_4POINT1;
+	else if (strcmp(channelSetupStr, "5.1") == 0)
+		ai.speakers = SPEAKERS_5POINT1;
+	else if (strcmp(channelSetupStr, "7.1") == 0)
+		ai.speakers = SPEAKERS_7POINT1;
+	else
+		ai.speakers = SPEAKERS_STEREO;
+
+	return obs_reset_audio(&ai);
+}
+
+
+
+void BroadcastWindow::SourceCreated(void *data, calldata_t *params)
+{
+	obs_source_t *source = (obs_source_t*)calldata_ptr(params, "source");
+
+	if (obs_scene_from_source(source) != NULL)
+		QMetaObject::invokeMethod(static_cast<BroadcastWindow*>(data),
+			"AddScene", WaitConnection(),
+			Q_ARG(OBSSource, OBSSource(source)));
+}
+
+void BroadcastWindow::SourceRemoved(void *data, calldata_t *params)
+{
+	obs_source_t *source = (obs_source_t*)calldata_ptr(params, "source");
+
+	if (obs_scene_from_source(source) != NULL)
+		QMetaObject::invokeMethod(static_cast<BroadcastWindow*>(data),
+			"RemoveScene",
+			Q_ARG(OBSSource, OBSSource(source)));
+}
+
+void BroadcastWindow::SourceActivated(void *data, calldata_t *params)
+{
+	obs_source_t *source = (obs_source_t*)calldata_ptr(params, "source");
+	uint32_t     flags = obs_source_get_output_flags(source);
+
+	if (flags & OBS_SOURCE_AUDIO)
+		QMetaObject::invokeMethod(static_cast<BroadcastWindow*>(data),
+			"ActivateAudioSource",
+			Q_ARG(OBSSource, OBSSource(source)));
+}
+
+void BroadcastWindow::SourceDeactivated(void *data, calldata_t *params)
+{
+	obs_source_t *source = (obs_source_t*)calldata_ptr(params, "source");
+	uint32_t     flags = obs_source_get_output_flags(source);
+
+	if (flags & OBS_SOURCE_AUDIO)
+		QMetaObject::invokeMethod(static_cast<BroadcastWindow*>(data),
+			"DeactivateAudioSource",
+			Q_ARG(OBSSource, OBSSource(source)));
+}
+
+
+void BroadcastWindow::AddScene(OBSSource source)
+{
+}
+
+void BroadcastWindow::RemoveScene(OBSSource source)
+{
+}
+
+void BroadcastWindow::ActivateAudioSource(OBSSource source)
+{
+	bool vertical = false;
+	VolControl *vol = new VolControl(source, true, vertical);
+
+	double meterDecayRate = config_get_double(basicConfig, "Audio",
+		"MeterDecayRate");
+	vol->SetMeterDecayRate(meterDecayRate);
+
+	uint32_t peakMeterTypeIdx = config_get_uint(basicConfig, "Audio",
+		"PeakMeterType");
+
+	enum obs_peak_meter_type peakMeterType;
+	switch (peakMeterTypeIdx) {
+	case 0:
+		peakMeterType = SAMPLE_PEAK_METER;
+		break;
+	case 1:
+		peakMeterType = TRUE_PEAK_METER;
+		break;
+	default:
+		peakMeterType = SAMPLE_PEAK_METER;
+		break;
+	}
+
+	vol->setPeakMeterType(peakMeterType);
+/*
+	vol->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(vol, &QWidget::customContextMenuRequested,
+		this, &OBSBasic::VolControlContextMenu);
+	connect(vol, &VolControl::ConfigClicked,
+		this, &OBSBasic::VolControlContextMenu);
+*/
+	InsertQObjectByName(volumes, vol);
+
+	for (auto volume : volumes) {
+		ui->previewPane->ui->hVolControlLayout->addWidget(volume);
+	}
+}
+
+void BroadcastWindow::DeactivateAudioSource(OBSSource source)
+{
+	for (size_t i = 0; i < volumes.size(); i++) {
+		if (volumes[i]->GetSource() == source) {
+			delete volumes[i];
+			volumes.erase(volumes.begin() + i);
+			break;
+		}
+	}
+}
+
+
+void BroadcastWindow::InitOBSCallbacks()
+{
+	signalHandlers.reserve(signalHandlers.size() + 6);
+	signalHandlers.emplace_back(obs_get_signal_handler(), "source_create",
+		BroadcastWindow::SourceCreated, this);
+	signalHandlers.emplace_back(obs_get_signal_handler(), "source_remove",
+		BroadcastWindow::SourceRemoved, this);
+	signalHandlers.emplace_back(obs_get_signal_handler(), "source_activate",
+		BroadcastWindow::SourceActivated, this);
+	signalHandlers.emplace_back(obs_get_signal_handler(), "source_deactivate",
+		BroadcastWindow::SourceDeactivated, this);
+//	signalHandlers.emplace_back(obs_get_signal_handler(), "source_rename",
+//		BroadcastWindow::SourceRenamed, this);
 }

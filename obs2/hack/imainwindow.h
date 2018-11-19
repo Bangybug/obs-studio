@@ -4,6 +4,7 @@
 #include <obs-frontend-api.h>
 #include <window-basic-main-outputs.hpp>
 #include <QSystemTrayIcon>
+#include <window-main.hpp>
 
 typedef struct PreviewInfo {
 	float scale = 0.0f;
@@ -16,9 +17,12 @@ typedef struct PreviewInfo {
 	gs_vertbuffer_t *circle = nullptr;
 } SPreviewInfo;
 
-class IMainWindow
+
+class IMainWindow : public OBSMainWindow
 {
 public:
+	inline IMainWindow(QWidget *parent) : OBSMainWindow(parent) {}
+
 	virtual int getSceneCount() = 0;
 
 	virtual OBSScene getScene(int index) = 0;
@@ -93,6 +97,8 @@ public:
 	virtual void SysTrayNotify(const QString &text, QSystemTrayIcon::MessageIcon n)=0;
 
 	virtual void OBSInit()=0;
+
+	virtual int GetProfilePath(char *path, size_t size, const char *file)const =0;
 
 };
 

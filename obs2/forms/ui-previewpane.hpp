@@ -13,40 +13,53 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <window-basic-preview.hpp>
 
 QT_BEGIN_NAMESPACE
 
 class Ui_PreviewPane
 {
 public:
-    QGraphicsView *graphicsView;
-    QWidget *verticalLayoutWidget;
+    QVBoxLayout *verticalLayout_2;
+    OBSBasicPreview *widget;
     QVBoxLayout *verticalLayout;
-    QLabel *label;
+    QWidget *hVolumeWidgets;
+    QVBoxLayout *hVolControlLayout;
 
     void setupUi(QWidget *PreviewPane)
     {
         if (PreviewPane->objectName().isEmpty())
             PreviewPane->setObjectName(QStringLiteral("PreviewPane"));
         PreviewPane->resize(453, 497);
-        graphicsView = new QGraphicsView(PreviewPane);
-        graphicsView->setObjectName(QStringLiteral("graphicsView"));
-        graphicsView->setGeometry(QRect(20, 10, 256, 192));
-        verticalLayoutWidget = new QWidget(PreviewPane);
-        verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(20, 220, 421, 271));
-        verticalLayout = new QVBoxLayout(verticalLayoutWidget);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        verticalLayout->setContentsMargins(0, 0, 0, 0);
-        label = new QLabel(verticalLayoutWidget);
-        label->setObjectName(QStringLiteral("label"));
+        verticalLayout_2 = new QVBoxLayout(PreviewPane);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        widget = new OBSBasicPreview(PreviewPane);
+        widget->setObjectName(QStringLiteral("widget"));
 
-        verticalLayout->addWidget(label);
+        verticalLayout_2->addWidget(widget);
+
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        hVolumeWidgets = new QWidget(PreviewPane);
+        hVolumeWidgets->setObjectName(QStringLiteral("hVolumeWidgets"));
+        hVolumeWidgets->setGeometry(QRect(0, 0, 81, 32));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(hVolumeWidgets->sizePolicy().hasHeightForWidth());
+        hVolumeWidgets->setSizePolicy(sizePolicy);
+        hVolControlLayout = new QVBoxLayout(hVolumeWidgets);
+        hVolControlLayout->setSpacing(0);
+        hVolControlLayout->setObjectName(QStringLiteral("hVolControlLayout"));
+        hVolControlLayout->setContentsMargins(0, 0, 0, 0);
+
+        verticalLayout->addWidget(hVolumeWidgets);
+
+
+        verticalLayout_2->addLayout(verticalLayout);
 
 
         retranslateUi(PreviewPane);
@@ -57,7 +70,6 @@ public:
     void retranslateUi(QWidget *PreviewPane)
     {
         PreviewPane->setWindowTitle(QApplication::translate("PreviewPane", "Form", Q_NULLPTR));
-        label->setText(QApplication::translate("PreviewPane", "\320\222\321\205\320\276\320\264 (Aux1)", Q_NULLPTR));
     } // retranslateUi
 
 };

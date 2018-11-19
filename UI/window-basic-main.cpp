@@ -163,7 +163,7 @@ static int CountVideoSources()
 }
 
 OBSBasic::OBSBasic(QWidget *parent)
-	: OBSMainWindow  (parent),
+	: IMainWindow  (parent),
 	  ui             (new Ui::OBSBasic)
 {
 	setAttribute(Qt::WA_NativeWindow);

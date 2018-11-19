@@ -28,7 +28,10 @@
 
 #define PREVIEW_EDGE_SIZE 10
 
-class BroadcastWindow : public IMainWindow, public OBSMainWindow {
+class VolControl;
+
+
+class BroadcastWindow : public IMainWindow {
 	Q_OBJECT
 private:
 	volatile bool previewProgramMode = false;
@@ -38,10 +41,12 @@ private:
 	long disableSaving = 1;
 	float previewScale = 0.0f;
 	SPreviewInfo previewInfo;
-	ConfigFile    basicConfig;
+	ConfigFile basicConfig;
 	std::unique_ptr<BasicOutputHandler> outputHandler;
 	int disableOutputsRef = 0;
 	obs_frontend_callbacks *api = nullptr;
+	std::vector<VolControl*> volumes;
+	std::vector<OBSSignal> signalHandlers;
 
 public:
 	BroadcastWindow(QWidget *parent);
@@ -188,11 +193,25 @@ public slots:
 	void ResetOutputs();
 
 
-	virtual int GetProfilePath(char *path, size_t size, const char *file)
-		const override;
+	int GetProfilePath(char *path, size_t size, const char *file) const;
 
 	bool InitBasicConfig();
 	bool InitBasicConfigDefaults();
+
+	bool ResetAudio();
+
+	void AddScene(OBSSource source);
+	void RemoveScene(OBSSource source);
+	void ActivateAudioSource(OBSSource source);
+	void DeactivateAudioSource(OBSSource source);
+
+private:
+	static void SourceCreated(void *data, calldata_t *params);
+	static void SourceRemoved(void *data, calldata_t *params);
+	static void SourceActivated(void *data, calldata_t *params);
+	static void SourceDeactivated(void *data, calldata_t *params);
+
+	void InitOBSCallbacks();
 
 private:
 	std::unique_ptr<Ui::BroadcastWindow> ui;

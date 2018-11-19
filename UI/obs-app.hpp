@@ -31,7 +31,8 @@
 #include <vector>
 #include <deque>
 
-#include "window-main.hpp"
+#include "../../obs2/hack/imainwindow.h"
+#include <qpalette.h>
 
 std::string CurrentTimeString();
 std::string CurrentDateTimeString();
@@ -40,7 +41,7 @@ std::string GenerateSpecifiedFilename(const char *extension, bool noSpace,
 					const char *format);
 QObject *CreateShortcutFilter();
 
-#include "../obs2/forms/broadcastwindow.hpp"
+class BroadcastWindow;
 
 struct BaseLexer {
 	lexer lex;
@@ -60,6 +61,7 @@ public:
 			const char *disambiguation, int n) const override;
 };
 
+
 class OBSApp : public QApplication {
 	Q_OBJECT
 
@@ -69,7 +71,7 @@ private:
 	ConfigFile                     globalConfig;
 	TextLookup                     textLookup;
 	OBSContext                     obsContext;
-	QPointer<OBSMainWindow>        mainWindow;
+	QPointer<IMainWindow>          mainWindow;
 	profiler_name_store_t          *profilerNameStore = nullptr;
 
 	os_inhibit_t                   *sleepInhibitor = nullptr;
@@ -104,7 +106,7 @@ public:
 
 	void EnableInFocusHotkeys(bool enable);
 
-	inline QMainWindow *GetMainWindow() const {return mainWindow.data();}
+	QMainWindow *GetMainWindow();
 
 	inline config_t *GlobalConfig() const {return globalConfig;}
 
@@ -197,7 +199,7 @@ bool WindowPositionValid(QRect rect);
 
 static inline int GetProfilePath(char *path, size_t size, const char *file)
 {
-	OBSMainWindow *window = reinterpret_cast<OBSMainWindow*>(
+	IMainWindow *window = reinterpret_cast<IMainWindow*>(
 			App()->GetMainWindow());
 	return window->GetProfilePath(path, size, file);
 }
@@ -215,3 +217,4 @@ extern bool opt_studio_mode;
 extern bool opt_allow_opengl;
 extern bool opt_always_on_top;
 extern std::string opt_starting_scene;
+

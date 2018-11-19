@@ -80,6 +80,9 @@
       <AdditionalIncludeDirectories>..\build\UI;..\UI;..\build\UI\obs_autogen\include_Debug;$(DepsPath);..\deps\blake2\src;..\build\config;..\deps\jansson\src;..\build\deps\jansson\include;..\UI\obs-frontend-api;..\libobs;..\deps\libff;..\deps\json11;$(QTDIR)\include;$(QTDIR)\include\\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;$(QTDIR)\.\mkspecs\win32-msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG=1;_DEBUG=1;DL_OPENGL="libobs-opengl.dll";DL_D3D9="";DL_D3D11="libobs-d3d11.dll";UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;HAVE_OBSCONFIG_H;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4127;4201;4456;4457;4458;4459;4595</DisableSpecificWarnings>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Cored.lib;$(QTDIR)\lib\qtmaind.lib;..\build\ui\obs-frontend-api\Debug\obs-frontend-api.lib;$(DEPSPATH)\..\bin\avcodec.lib;$(DEPSPATH)\..\bin\avutil.lib;$(DEPSPATH)\..\bin\avformat.lib;$(DEPSPATH)\..\bin\libcurl.lib;crypt32.lib;..\build\deps\blake2\Debug\blake2.lib;..\build\deps\jansson\lib\Debug\jansson_d.lib;..\build\libobs\Debug\obs.lib;%(AdditionalDependencies)</AdditionalDependencies>

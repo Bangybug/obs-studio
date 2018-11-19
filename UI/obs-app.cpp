@@ -1243,13 +1243,14 @@ bool OBSApp::OBSInit()
 
 	setQuitOnLastWindowClosed(false);
 
-	mainWindow = new BroadcastWindow(0);
-	mainWindow->show();
+	//mainWindow = new BroadcastWindow(0);
+	mainWindow = new OBSBasic();
 
-	//mainWindow = new OBSBasic();
+	mainWindow->getWindow()->show();
 
-	mainWindow->setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(mainWindow, SIGNAL(destroyed()), this, SLOT(quit()));
+
+	mainWindow->getWindow()->setAttribute(Qt::WA_DeleteOnClose, true);
+	connect(mainWindow->getWindow(), SIGNAL(destroyed()), this, SLOT(quit()));
 
 	mainWindow->OBSInit();
 
@@ -2295,4 +2296,10 @@ int main(int argc, char *argv[])
 	blog(LOG_INFO, "Number of memory leaks: %ld", bnum_allocs());
 	base_set_log_handler(nullptr, nullptr);
 	return ret;
+}
+
+
+ QMainWindow* OBSApp::GetMainWindow()
+ {
+	return mainWindow->getWindow();
 }

@@ -101,7 +101,7 @@ private:
 	std::shared_ptr<OBSSignal> renamedSignal;
 };
 
-class OBSBasic : public OBSMainWindow, public IMainWindow {
+class OBSBasic : public IMainWindow {
 	Q_OBJECT
 
 	friend class OBSBasicPreview;
