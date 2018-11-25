@@ -799,7 +799,7 @@ void OBSBasic::Load(const char *file)
 		disableSaving--;
 		blog(LOG_INFO, "No scene file found, creating default scene");
 		CreateDefaultScene(true);
-		SaveProject();
+		//SaveProject();
 		return;
 	}
 

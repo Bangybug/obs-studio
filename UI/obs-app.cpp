@@ -1243,7 +1243,7 @@ bool OBSApp::OBSInit()
 
 	setQuitOnLastWindowClosed(false);
 
-	//mainWindow = new BroadcastWindow(0);
+//	mainWindow = new BroadcastWindow(0);
 	mainWindow = new OBSBasic();
 
 	mainWindow->getWindow()->show();

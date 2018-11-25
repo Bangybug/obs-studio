@@ -7,6 +7,8 @@
 #include <platform.hpp>
 #include <volume-control.hpp>
 #include <item-widget-helpers.hpp>
+#include <window-projector.hpp>
+#include <display-helpers.hpp>
 
 extern obs_frontend_callbacks *InitializeAPIInterface(IMainWindow *main);
 
@@ -24,6 +26,19 @@ BroadcastWindow::BroadcastWindow(QWidget *parent)
 #define VOLUME_METER_DECAY_FAST        23.53
 #define VOLUME_METER_DECAY_MEDIUM      11.76
 #define VOLUME_METER_DECAY_SLOW        8.57
+
+#define UNSUPPORTED_ERROR \
+	"Failed to initialize video:\n\nRequired graphics API functionality " \
+	"not found.  Your GPU may not be supported."
+#define UNKNOWN_ERROR \
+	"Failed to initialize video.  Your GPU may not be supported, " \
+	"or your graphics drivers may need to be updated."
+#ifdef _WIN32
+#define IS_WIN32 1
+#else
+#define IS_WIN32 0
+#endif
+
 
 static const double scaled_vals[] =
 {
@@ -98,6 +113,19 @@ void BroadcastWindow::OBSInit()
 	if (!ResetAudio())
 		throw "Failed to initialize audio";
 
+	ret = ResetVideo();
+	switch (ret) {
+	case OBS_VIDEO_MODULE_NOT_FOUND:
+		throw "Failed to initialize video:  Graphics module not found";
+	case OBS_VIDEO_NOT_SUPPORTED:
+		throw UNSUPPORTED_ERROR;
+	case OBS_VIDEO_INVALID_PARAM:
+		throw "Failed to initialize video:  Invalid parameters";
+	default:
+		if (ret != OBS_VIDEO_SUCCESS)
+			throw UNKNOWN_ERROR;
+	}
+
 	/* load audio monitoring */
 #if defined(_WIN32) || defined(__APPLE__) || HAVE_PULSEAUDIO
 	const char *device_name = config_get_string(basicConfig, "Audio",
@@ -125,6 +153,16 @@ void BroadcastWindow::OBSInit()
 #if defined(_WIN32) && defined(BROWSER_AVAILABLE)
 	create_browser_widget = obs_browser_init_panel();
 #endif
+
+
+#ifndef __APPLE__
+	{
+		disableSaving--;
+		Load(savePath);
+		disableSaving++;
+	}
+#endif
+
 
 	ResetOutputs();
 }
@@ -520,6 +558,12 @@ void BroadcastWindow::SetCurrentScene(OBSSource scene, bool force, bool direct)
 {
 }
 
+void BroadcastWindow::SetCurrentScene(obs_scene_t *scene, bool force, bool direct)
+{
+	obs_source_t *source = obs_scene_get_source(scene);
+	SetCurrentScene(source, force, direct);
+}
+
 bool BroadcastWindow::AddSceneCollection(
 	bool create_new,
 	const QString &name)
@@ -568,6 +612,82 @@ int BroadcastWindow::GetProfilePath(char *path, size_t size, const char *file) c
 
 	return snprintf(path, size, "%s/%s/%s", profiles_path, profile, file);
 }
+
+void BroadcastWindow::GetConfigFPS(uint32_t &num, uint32_t &den) const
+{
+	uint32_t type = config_get_uint(basicConfig, "Video", "FPSType");
+
+	if (type == 1) //"Integer"
+		GetFPSInteger(num, den);
+	else if (type == 2) //"Fraction"
+		GetFPSFraction(num, den);
+	else if (false) //"Nanoseconds", currently not implemented
+		GetFPSNanoseconds(num, den);
+	else
+		GetFPSCommon(num, den);
+}
+
+void BroadcastWindow::GetFPSInteger(uint32_t &num, uint32_t &den) const
+{
+	num = (uint32_t)config_get_uint(basicConfig, "Video", "FPSInt");
+	den = 1;
+}
+
+void BroadcastWindow::GetFPSFraction(uint32_t &num, uint32_t &den) const
+{
+	num = (uint32_t)config_get_uint(basicConfig, "Video", "FPSNum");
+	den = (uint32_t)config_get_uint(basicConfig, "Video", "FPSDen");
+}
+
+void BroadcastWindow::GetFPSNanoseconds(uint32_t &num, uint32_t &den) const
+{
+	num = 1000000000;
+	den = (uint32_t)config_get_uint(basicConfig, "Video", "FPSNS");
+}
+
+
+void BroadcastWindow::GetFPSCommon(uint32_t &num, uint32_t &den) const
+{
+	const char *val = config_get_string(basicConfig, "Video", "FPSCommon");
+
+	if (strcmp(val, "10") == 0) {
+		num = 10;
+		den = 1;
+	}
+	else if (strcmp(val, "20") == 0) {
+		num = 20;
+		den = 1;
+	}
+	else if (strcmp(val, "24 NTSC") == 0) {
+		num = 24000;
+		den = 1001;
+	}
+	else if (strcmp(val, "25") == 0) {
+		num = 25;
+		den = 1;
+	}
+	else if (strcmp(val, "29.97") == 0) {
+		num = 30000;
+		den = 1001;
+	}
+	else if (strcmp(val, "48") == 0) {
+		num = 48;
+		den = 1;
+	}
+	else if (strcmp(val, "59.94") == 0) {
+		num = 60000;
+		den = 1001;
+	}
+	else if (strcmp(val, "60") == 0) {
+		num = 60;
+		den = 1;
+	}
+	else {
+		num = 30;
+		den = 1;
+	}
+}
+
 
 
 bool BroadcastWindow::InitBasicConfig()
@@ -945,4 +1065,343 @@ void BroadcastWindow::InitOBSCallbacks()
 		BroadcastWindow::SourceDeactivated, this);
 //	signalHandlers.emplace_back(obs_get_signal_handler(), "source_rename",
 //		BroadcastWindow::SourceRenamed, this);
+}
+
+static inline enum video_format GetVideoFormatFromName(const char *name)
+{
+	if (astrcmpi(name, "I420") == 0)
+		return VIDEO_FORMAT_I420;
+	else if (astrcmpi(name, "NV12") == 0)
+		return VIDEO_FORMAT_NV12;
+	else if (astrcmpi(name, "I444") == 0)
+		return VIDEO_FORMAT_I444;
+#if 0 //currently unsupported
+	else if (astrcmpi(name, "YVYU") == 0)
+		return VIDEO_FORMAT_YVYU;
+	else if (astrcmpi(name, "YUY2") == 0)
+		return VIDEO_FORMAT_YUY2;
+	else if (astrcmpi(name, "UYVY") == 0)
+		return VIDEO_FORMAT_UYVY;
+#endif
+	else
+		return VIDEO_FORMAT_RGBA;
+}
+
+static inline enum obs_scale_type GetScaleType(ConfigFile &basicConfig)
+{
+	const char *scaleTypeStr = config_get_string(basicConfig,
+		"Video", "ScaleType");
+
+	if (astrcmpi(scaleTypeStr, "bilinear") == 0)
+		return OBS_SCALE_BILINEAR;
+	else if (astrcmpi(scaleTypeStr, "lanczos") == 0)
+		return OBS_SCALE_LANCZOS;
+	else
+		return OBS_SCALE_BICUBIC;
+}
+
+
+
+static inline int AttemptToResetVideo(struct obs_video_info *ovi)
+{
+	return obs_reset_video(ovi);
+}
+
+void BroadcastWindow::ResizePreview(uint32_t cx, uint32_t cy)
+{
+	QSize  targetSize;
+	bool isFixedScaling;
+	obs_video_info ovi;
+
+	/* resize preview panel to fix to the top section of the window */
+	OBSBasicPreview *preview = ui->previewPane->ui->widget;
+	targetSize = GetPixelSize(preview);
+
+	isFixedScaling = preview->IsFixedScaling();
+	obs_get_video_info(&ovi);
+
+	if (isFixedScaling) {
+		previewScale = preview->GetScalingAmount();
+		GetCenterPosFromFixedScale(int(cx), int(cy),
+			targetSize.width() - PREVIEW_EDGE_SIZE * 2,
+			targetSize.height() - PREVIEW_EDGE_SIZE * 2,
+			previewInfo.x, previewInfo.y, previewScale);
+		previewInfo.x += preview->GetScrollX();
+		previewInfo.y += preview->GetScrollY();
+
+	}
+	else {
+		GetScaleAndCenterPos(int(cx), int(cy),
+			targetSize.width() - PREVIEW_EDGE_SIZE * 2,
+			targetSize.height() - PREVIEW_EDGE_SIZE * 2,
+			previewInfo.x, previewInfo.y, previewScale);
+	}
+
+	previewInfo.x += float(PREVIEW_EDGE_SIZE);
+	previewInfo.y += float(PREVIEW_EDGE_SIZE);
+}
+
+
+int BroadcastWindow::ResetVideo()
+{
+	if (outputHandler && outputHandler->Active())
+		return OBS_VIDEO_CURRENTLY_ACTIVE;
+
+	struct obs_video_info ovi;
+	int ret;
+
+	GetConfigFPS(ovi.fps_num, ovi.fps_den);
+
+	const char *colorFormat = config_get_string(basicConfig, "Video",
+		"ColorFormat");
+	const char *colorSpace = config_get_string(basicConfig, "Video",
+		"ColorSpace");
+	const char *colorRange = config_get_string(basicConfig, "Video",
+		"ColorRange");
+
+	ovi.graphics_module = App()->GetRenderModule();
+	ovi.base_width = (uint32_t)config_get_uint(basicConfig,
+		"Video", "BaseCX");
+	ovi.base_height = (uint32_t)config_get_uint(basicConfig,
+		"Video", "BaseCY");
+	ovi.output_width = (uint32_t)config_get_uint(basicConfig,
+		"Video", "OutputCX");
+	ovi.output_height = (uint32_t)config_get_uint(basicConfig,
+		"Video", "OutputCY");
+	ovi.output_format = GetVideoFormatFromName(colorFormat);
+	ovi.colorspace = astrcmpi(colorSpace, "601") == 0 ?
+		VIDEO_CS_601 : VIDEO_CS_709;
+	ovi.range = astrcmpi(colorRange, "Full") == 0 ?
+		VIDEO_RANGE_FULL : VIDEO_RANGE_PARTIAL;
+	ovi.adapter = config_get_uint(App()->GlobalConfig(),
+		"Video", "AdapterIdx");
+	ovi.gpu_conversion = true;
+	ovi.scale_type = GetScaleType(basicConfig);
+
+	if (ovi.base_width == 0 || ovi.base_height == 0) {
+		ovi.base_width = 1920;
+		ovi.base_height = 1080;
+		config_set_uint(basicConfig, "Video", "BaseCX", 1920);
+		config_set_uint(basicConfig, "Video", "BaseCY", 1080);
+	}
+
+	if (ovi.output_width == 0 || ovi.output_height == 0) {
+		ovi.output_width = ovi.base_width;
+		ovi.output_height = ovi.base_height;
+		config_set_uint(basicConfig, "Video", "OutputCX",
+			ovi.base_width);
+		config_set_uint(basicConfig, "Video", "OutputCY",
+			ovi.base_height);
+	}
+
+	ret = AttemptToResetVideo(&ovi);
+	if (IS_WIN32 && ret != OBS_VIDEO_SUCCESS) {
+		if (ret == OBS_VIDEO_CURRENTLY_ACTIVE) {
+			blog(LOG_WARNING, "Tried to reset when "
+				"already active");
+			return ret;
+		}
+
+		/* Try OpenGL if DirectX fails on windows */
+		if (astrcmpi(ovi.graphics_module, DL_OPENGL) != 0) {
+			blog(LOG_WARNING, "Failed to initialize obs video (%d) "
+				"with graphics_module='%s', retrying "
+				"with graphics_module='%s'",
+				ret, ovi.graphics_module,
+				DL_OPENGL);
+			ovi.graphics_module = DL_OPENGL;
+			ret = AttemptToResetVideo(&ovi);
+		}
+	}
+	else if (ret == OBS_VIDEO_SUCCESS) {
+		ResizePreview(ovi.base_width, ovi.base_height);
+//		if (program)
+//			ResizeProgram(ovi.base_width, ovi.base_height);
+	}
+
+	if (ret == OBS_VIDEO_SUCCESS) {
+//		OBSBasicStats::InitializeValues();
+		OBSProjector::UpdateMultiviewProjectors();
+	}
+
+	return ret;
+}
+
+void BroadcastWindow::ClearSceneData()
+{
+	disableSaving++;
+
+	//CloseDialogs();
+	//ClearVolumeControls();
+	//ClearListItems(ui->scenes);
+	//ui->sources->Clear();
+	//ClearQuickTransitions();
+	//ui->transitions->clear();
+
+	obs_set_output_source(0, nullptr);
+	obs_set_output_source(1, nullptr);
+	obs_set_output_source(2, nullptr);
+	obs_set_output_source(3, nullptr);
+	obs_set_output_source(4, nullptr);
+	obs_set_output_source(5, nullptr);
+	//lastScene = nullptr;
+	//swapScene = nullptr;
+	programScene = nullptr;
+
+	auto cb = [](void *unused, obs_source_t *source)
+	{
+		obs_source_remove(source);
+		UNUSED_PARAMETER(unused);
+		return true;
+	};
+
+	obs_enum_sources(cb, nullptr);
+
+	if (api)
+		api->on_event(OBS_FRONTEND_EVENT_SCENE_COLLECTION_CLEANUP);
+
+	disableSaving--;
+}
+
+void BroadcastWindow::InitDefaultTransitions()
+{
+	size_t idx = 0;
+	const char *id;
+
+	while (obs_enum_transition_types(idx++, &id))
+	{
+		if (!obs_is_source_configurable(id)) {
+			const char *name = obs_source_get_display_name(id);
+
+			obs_source_t *tr = obs_source_create_private(
+				id, name, NULL);
+			if (strcmp(id, "fade_transition") == 0)
+			{
+				//InitTransition(tr);
+				fadeTransition = tr;
+			}
+			else
+				obs_source_release(tr);
+		}
+	}
+}
+
+
+void BroadcastWindow::InitTransition(obs_source_t *transition)
+{
+	auto onTransitionStop = [](void *data, calldata_t*) {
+		IMainWindow *window = (IMainWindow*)data;
+		QMetaObject::invokeMethod(window->getWindow(), "TransitionStopped",
+			Qt::QueuedConnection);
+	};
+
+	auto onTransitionFullStop = [](void *data, calldata_t*) {
+		IMainWindow *window = (IMainWindow*)data;
+		QMetaObject::invokeMethod(window->getWindow(), "TransitionFullyStopped",
+			Qt::QueuedConnection);
+	};
+
+	signal_handler_t *handler = obs_source_get_signal_handler(transition);
+	signal_handler_connect(handler, "transition_video_stop",
+		onTransitionStop, this);
+	signal_handler_connect(handler, "transition_stop",
+		onTransitionFullStop, this);
+}
+
+static inline bool HasAudioDevices(const char *source_id)
+{
+	const char *output_id = source_id;
+	obs_properties_t *props = obs_get_source_properties(output_id);
+	size_t count = 0;
+
+	if (!props)
+		return false;
+
+	obs_property_t *devices = obs_properties_get(props, "device_id");
+	if (devices)
+		count = obs_property_list_item_count(devices);
+
+	obs_properties_destroy(props);
+
+	return count != 0;
+}
+
+
+void BroadcastWindow::CreateFirstRunSources()
+{
+	bool hasDesktopAudio = HasAudioDevices(App()->OutputAudioSource());
+	bool hasInputAudio = HasAudioDevices(App()->InputAudioSource());
+
+	if (hasDesktopAudio)
+		ResetAudioDevice(App()->OutputAudioSource(), "default",
+			Str("Basic.DesktopDevice1"), 1);
+	if (hasInputAudio)
+		ResetAudioDevice(App()->InputAudioSource(), "default",
+			Str("Basic.AuxDevice1"), 3);
+}
+
+void BroadcastWindow::ResetAudioDevice(const char *sourceId, const char *deviceId,
+	const char *deviceDesc, int channel)
+{
+	bool disable = deviceId && strcmp(deviceId, "disabled") == 0;
+	obs_source_t *source;
+	obs_data_t *settings;
+
+	source = obs_get_output_source(channel);
+	if (source) {
+		if (disable) {
+			obs_set_output_source(channel, nullptr);
+		}
+		else {
+			settings = obs_source_get_settings(source);
+			const char *oldId = obs_data_get_string(settings,
+				"device_id");
+			if (strcmp(oldId, deviceId) != 0) {
+				obs_data_set_string(settings, "device_id",
+					deviceId);
+				obs_source_update(source, settings);
+			}
+			obs_data_release(settings);
+		}
+
+		obs_source_release(source);
+
+	}
+	else if (!disable) {
+		settings = obs_data_create();
+		obs_data_set_string(settings, "device_id", deviceId);
+		source = obs_source_create(sourceId, deviceDesc, settings,
+			nullptr);
+		obs_data_release(settings);
+
+		obs_set_output_source(channel, source);
+		obs_source_release(source);
+	}
+}
+
+
+void BroadcastWindow::Load(const char *file)
+{
+	CreateDefaultScene(true);
+}
+
+void BroadcastWindow::CreateDefaultScene(bool firstStart)
+{
+	disableSaving++;
+
+	ClearSceneData();
+	InitDefaultTransitions();
+	//CreateDefaultQuickTransitions();
+	//ui->transitionDuration->setValue(300);
+	SetTransition(fadeTransition);
+
+	obs_scene_t  *scene = obs_scene_create(Str("Basic.Scene"));
+
+	if (firstStart)
+		CreateFirstRunSources();
+
+	SetCurrentScene(scene, true);
+	obs_scene_release(scene);
+
+	disableSaving--;
 }

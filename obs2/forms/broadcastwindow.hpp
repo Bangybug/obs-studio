@@ -47,6 +47,7 @@ private:
 	obs_frontend_callbacks *api = nullptr;
 	std::vector<VolControl*> volumes;
 	std::vector<OBSSignal> signalHandlers;
+	obs_source_t *fadeTransition;
 
 public:
 	BroadcastWindow(QWidget *parent);
@@ -199,6 +200,7 @@ public slots:
 	bool InitBasicConfigDefaults();
 
 	bool ResetAudio();
+	int ResetVideo();
 
 	void AddScene(OBSSource source);
 	void RemoveScene(OBSSource source);
@@ -206,10 +208,29 @@ public slots:
 	void DeactivateAudioSource(OBSSource source);
 
 private:
+	void GetConfigFPS(uint32_t &num, uint32_t &den) const;
+	void GetFPSInteger(uint32_t &num, uint32_t &den) const;
+	void GetFPSFraction(uint32_t &num, uint32_t &den) const;
+	void GetFPSNanoseconds(uint32_t &num, uint32_t &den) const;
+	void GetFPSCommon(uint32_t &num, uint32_t &den) const;
+
+	void ResetAudioDevice(const char *sourceId, const char *deviceId,const char *deviceDesc, int channel);
+
 	static void SourceCreated(void *data, calldata_t *params);
 	static void SourceRemoved(void *data, calldata_t *params);
 	static void SourceActivated(void *data, calldata_t *params);
 	static void SourceDeactivated(void *data, calldata_t *params);
+
+	void SetCurrentScene(obs_scene_t *scene, bool force = false, bool direct = false);
+
+	void ResizePreview(uint32_t cx, uint32_t cy);
+	void Load(const char *file);
+
+	void InitTransition(obs_source_t *transition);
+	void InitDefaultTransitions();
+	void ClearSceneData();
+	void CreateDefaultScene(bool firstStart);
+	void CreateFirstRunSources();
 
 	void InitOBSCallbacks();
 
